@@ -1,19 +1,28 @@
 let lastHeight = 0;
 let frameId = null;
 
-function sendHeight() {
-    const height = Math.ceil(document.documentElement.scrollHeight || document.body?.scrollHeight || 0);
-    const safeHeight = Math.max(300, Math.min(height, 4000));
+function getVisibleContentHeight() {
+    const container = document.querySelector(".booking-page") || document.querySelector("main") || document.body;
+    const containerHeight = container?.getBoundingClientRect().height || 0;
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+    const bodyHeight = document.body?.scrollHeight || 0;
 
-    if (safeHeight === lastHeight) {
+    const measuredHeight = Math.max(containerHeight, viewportHeight, bodyHeight);
+    return Math.ceil(Math.min(4000, Math.max(600, measuredHeight + 8)));
+}
+
+function sendHeight() {
+    const height = getVisibleContentHeight();
+
+    if (Math.abs(height - lastHeight) < 5) {
         return;
     }
 
-    lastHeight = safeHeight;
+    lastHeight = height;
 
     window.parent.postMessage({
         type: "booking-height",
-        height: safeHeight
+        height
     }, "*");
 }
 
@@ -27,17 +36,17 @@ function scheduleHeightUpdate() {
 
 window.addEventListener("load", scheduleHeightUpdate);
 window.addEventListener("resize", scheduleHeightUpdate);
-window.addEventListener("scroll", () => {
-    scheduleHeightUpdate();
-}, { passive: true });
 
 const observer = new ResizeObserver(() => {
     scheduleHeightUpdate();
 });
 
 if (document.body) {
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
     observer.observe(document.body);
 }
 
 setTimeout(scheduleHeightUpdate, 100);
-setTimeout(scheduleHeightUpdate, 500);
+setTimeout(scheduleHeightUpdate, 300);
+setTimeout(scheduleHeightUpdate, 800);
