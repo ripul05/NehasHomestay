@@ -1,14 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Neha's Booking</title>
-  <link rel="stylesheet" href="/css/style.css" />
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Neha's Homestay Booking</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Litepicker CSS -->
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/booking.css">
+    <link rel="stylesheet" href="css/calendar.css">
+    <link rel="stylesheet" href="css/responsive.css">
+
 </head>
+
 <body>
-  <h1>Neha's Booking</h1>
-  <p>Welcome to your booking app.</p>
-  <script src="/js/app.js"></script>
+
+    <main class="booking-page">
+
+        <section class="booking-card">
+
+            <h1 class="booking-title">
+                Book Your Stay
+            </h1>
+
+            <p class="booking-subtitle">
+                Select your dates and check room availability.
+            </p>
+
+            <div class="booking-form">
+
+    <!-- Date Range -->
+
+    <div class="booking-field full-width">
+
+        <label>
+            Select your stay
+        </label>
+
+        <div class="booking-input" id="datePickerButton">
+
+            <span class="booking-icon">📅</span>
+
+            <span id="selectedDates">
+                Select Check-In & Check-Out
+            </span>
+
+        </div>
+
+        <!-- Hidden Inputs -->
+
+        <input
+            id="checkIn"
+            type="hidden">
+
+        <input
+            id="checkOut"
+            type="hidden">
+
+    </div>
+
+
+    <!-- Guests -->
+
+    <div class="booking-field full-width">
+
+        <label>
+            Guests
+        </label>
+
+        <div class="booking-input guest-picker" id="guestPicker" role="button" tabindex="0">
+
+            <span class="booking-icon">👤</span>
+
+            <span id="guestText">2 Adults</span>
+
+            <span class="guest-chevron">▾</span>
+
+        </div>
+
+        <div class="guest-dropdown" id="guestDropdown" aria-hidden="true">
+            <div class="guest-row">
+                <div>
+                    <strong>Adults</strong>
+                    <p>Age 13+</p>
+                </div>
+                <div class="guest-controls">
+                    <button type="button" class="guest-btn" data-type="adults" data-action="decrease">−</button>
+                    <span class="guest-value" id="adultCount">2</span>
+                    <button type="button" class="guest-btn" data-type="adults" data-action="increase">+</button>
+                </div>
+            </div>
+
+            <div class="guest-row">
+                <div>
+                    <strong>Children</strong>
+                    <p>Age 2–12</p>
+                </div>
+                <div class="guest-controls">
+                    <button type="button" class="guest-btn" data-type="children" data-action="decrease">−</button>
+                    <span class="guest-value" id="childCount">0</span>
+                    <button type="button" class="guest-btn" data-type="children" data-action="increase">+</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Summary -->
+
+    <div class="booking-summary">
+
+        <span>Total Stay</span>
+
+        <strong id="totalNights">
+
+            0 Nights
+
+        </strong>
+
+    </div>
+
+
+    <button id="checkAvailability">
+
+        Check Availability
+
+    </button>
+
+</div>
+
+        </section>
+
+    </main>
+
+    <!-- Litepicker -->
+    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/bundle.js"></script>
+
+    <!-- JS -->
+    <script src="js/app.js"></script>
+    <script src="js/calendar.js"></script>
+    <script src="js/booking.js"></script>
+    <script src="js/guests.js"></script>
+
 </body>
+
 </html>
