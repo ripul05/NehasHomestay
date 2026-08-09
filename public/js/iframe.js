@@ -1,21 +1,43 @@
-function sendHeight() {
+let lastHeight = 0;
+let frameId = null;
 
-    const height = document.documentElement.scrollHeight;
+function sendHeight() {
+    const height = Math.ceil(document.documentElement.scrollHeight || document.body?.scrollHeight || 0);
+    const safeHeight = Math.max(300, Math.min(height, 4000));
+
+    if (safeHeight === lastHeight) {
+        return;
+    }
+
+    lastHeight = safeHeight;
 
     window.parent.postMessage({
         type: "booking-height",
-        height: height
+        height: safeHeight
     }, "*");
-
 }
 
-// Initial load
-window.addEventListener("load", sendHeight);
+function scheduleHeightUpdate() {
+    if (frameId) {
+        cancelAnimationFrame(frameId);
+    }
 
-// Resize window
-window.addEventListener("resize", sendHeight);
+    frameId = requestAnimationFrame(sendHeight);
+}
 
-// Observe DOM changes
-const observer = new ResizeObserver(sendHeight);
+window.addEventListener("load", scheduleHeightUpdate);
+window.addEventListener("resize", scheduleHeightUpdate);
+window.addEventListener("scroll", () => {
+    scheduleHeightUpdate();
+}, { passive: true });
 
-observer.observe(document.body);
+const observer = new ResizeObserver(() => {
+    scheduleHeightUpdate();
+});
+
+if (document.body) {
+    observer.observe(document.body);
+}
+
+setTimeout(scheduleHeightUpdate, 100);
+setTimeout(scheduleHeightUpdate, 500);
