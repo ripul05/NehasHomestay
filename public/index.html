@@ -35,118 +35,114 @@
     <main class="booking-page">
 
         <section class="booking-card">
-
+        
             <h1 class="booking-title">
                 Book Your Stay
             </h1>
-
+        
             <p class="booking-subtitle">
                 Select your dates and check room availability.
             </p>
-
+        
             <div class="booking-form">
-
-    <!-- Date Range -->
-
-    <div class="booking-field full-width">
-
-        <label>
-            Select your stay
-        </label>
-
-        <div class="booking-input" id="datePickerButton">
-
-            <span class="booking-icon">📅</span>
-
-            <span id="selectedDates">
-                Select Check-In & Check-Out
-            </span>
-
-        </div>
-
-        <!-- Hidden Inputs -->
-
-        <input
-            id="checkIn"
-            type="hidden">
-
-        <input
-            id="checkOut"
-            type="hidden">
-
-    </div>
-
-
-    <!-- Guests -->
-
-    <div class="booking-field full-width">
-
-        <label>
-            Guests
-        </label>
-
-        <div class="booking-input guest-picker" id="guestPicker" role="button" tabindex="0">
-
-            <span class="booking-icon">👤</span>
-
-            <span id="guestText">2 Adults</span>
-
-            <span class="guest-chevron">▾</span>
-
-        </div>
-
-        <div class="guest-dropdown" id="guestDropdown" aria-hidden="true">
-            <div class="guest-row">
-                <div>
-                    <strong>Adults</strong>
-                    <p>Age 13+</p>
+        
+                <!-- Date Range -->
+        
+                <div class="booking-field full-width">
+        
+                    <label>
+                        Select your stay
+                    </label>
+        
+                    <div class="booking-input" id="datePickerButton">
+        
+                        <span class="booking-icon">📅</span>
+        
+                        <span id="selectedDates">
+                            Select Check-In & Check-Out
+                        </span>
+        
+                    </div>
+        
+                    <!-- Hidden Inputs -->
+        
+                    <input id="checkIn" type="hidden">
+        
+                    <input id="checkOut" type="hidden">
+        
                 </div>
-                <div class="guest-controls">
-                    <button type="button" class="guest-btn" data-type="adults" data-action="decrease">−</button>
-                    <span class="guest-value" id="adultCount">2</span>
-                    <button type="button" class="guest-btn" data-type="adults" data-action="increase">+</button>
+        
+        
+                <!-- Guests -->
+        
+                <div class="booking-field full-width">
+        
+                    <label>
+                        Guests
+                    </label>
+        
+                    <div class="booking-input guest-picker" id="guestPicker" role="button" tabindex="0">
+        
+                        <span class="booking-icon">👤</span>
+        
+                        <span id="guestText">2 Adults</span>
+        
+                        <span class="guest-chevron">▾</span>
+        
+                    </div>
+        
+                    <div class="guest-dropdown" id="guestDropdown" aria-hidden="true">
+                        <div class="guest-row">
+                            <div>
+                                <strong>Adults</strong>
+                                <p>Age 13+</p>
+                            </div>
+                            <div class="guest-controls">
+                                <button type="button" class="guest-btn" data-type="adults" data-action="decrease">−</button>
+                                <span class="guest-value" id="adultCount">2</span>
+                                <button type="button" class="guest-btn" data-type="adults" data-action="increase">+</button>
+                            </div>
+                        </div>
+        
+                        <div class="guest-row">
+                            <div>
+                                <strong>Children</strong>
+                                <p>Age 2–12</p>
+                            </div>
+                            <div class="guest-controls">
+                                <button type="button" class="guest-btn" data-type="children" data-action="decrease">−</button>
+                                <span class="guest-value" id="childCount">0</span>
+                                <button type="button" class="guest-btn" data-type="children" data-action="increase">+</button>
+                            </div>
+                        </div>
+                    </div>
+        
                 </div>
+        
+        
+                <!-- Summary -->
+        
+                <div class="booking-summary">
+        
+                    <span>Total Stay</span>
+        
+                    <strong id="totalNights">
+        
+                        0 Nights
+        
+                    </strong>
+        
+                </div>
+        
+        
+                <button id="checkAvailability">
+        
+                    Check Availability
+        
+                </button>
+        
             </div>
-
-            <div class="guest-row">
-                <div>
-                    <strong>Children</strong>
-                    <p>Age 2–12</p>
-                </div>
-                <div class="guest-controls">
-                    <button type="button" class="guest-btn" data-type="children" data-action="decrease">−</button>
-                    <span class="guest-value" id="childCount">0</span>
-                    <button type="button" class="guest-btn" data-type="children" data-action="increase">+</button>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-
-    <!-- Summary -->
-
-    <div class="booking-summary">
-
-        <span>Total Stay</span>
-
-        <strong id="totalNights">
-
-            0 Nights
-
-        </strong>
-
-    </div>
-
-
-    <button id="checkAvailability">
-
-        Check Availability
-
-    </button>
-
-</div>
-
+        
         </section>
         
         <section class="availability-section" id="availabilitySection" style="display: none;">
@@ -238,6 +234,102 @@
             </div>
         
         </section>
+        
+        <section class="guest-details-section" id="guestDetailsSection" style="display: none;">
+        
+            <div class="guest-details-card">
+        
+                <div class="guest-details-header">
+        
+                    <h2>Guest Details</h2>
+        
+                    <p>
+                        Enter your details to continue with your booking.
+                    </p>
+        
+                </div>
+        
+        
+                <form id="guestDetailsForm">
+        
+                    <div class="form-group">
+        
+                        <label for="guestName">
+                            Full Name
+                        </label>
+        
+                        <input type="text" id="guestName" name="guestName" placeholder="Enter your full name"
+                            autocomplete="name" required>
+        
+                    </div>
+        
+        
+                    <div class="form-group">
+        
+                        <label for="guestEmail">
+                            Email Address
+                        </label>
+        
+                        <input type="email" id="guestEmail" name="email" placeholder="Enter your email" autocomplete="email"
+                            required>
+        
+                    </div>
+        
+        
+                    <div class="form-group">
+        
+                        <label for="guestPhone">
+                            Phone Number
+                        </label>
+        
+                        <input type="tel" id="guestPhone" name="phone" placeholder="Enter your phone number" autocomplete="tel"
+                            required>
+        
+                    </div>
+        
+        
+                    <!-- Booking Review -->
+        
+                    <div class="booking-review">
+        
+                        <h3>
+                            Booking Summary
+                        </h3>
+        
+        
+                        <div id="reviewDates" class="review-row"></div>
+        
+        
+                        <div id="reviewGuests" class="review-row"></div>
+        
+        
+                        <div id="reviewRooms" class="review-rooms"></div>
+        
+        
+                        <div class="review-total">
+        
+                            <span>
+                                Total
+                            </span>
+        
+                            <strong id="reviewTotal">
+                                ₹0
+                            </strong>
+        
+                        </div>
+        
+                    </div>
+        
+        
+                    <button type="submit" id="confirmBookingButton">
+                        Confirm & Proceed to Payment
+                    </button>
+        
+                </form>
+        
+            </div>
+        
+        </section>
 
     </main>
 
@@ -250,6 +342,7 @@
     <script src="js/booking.js"></script>
     <script src="js/guests.js"></script>
     <script src="js/availability.js"></script>
+    <script src="js/booking-flow.js"></script>
 
 
 </body>

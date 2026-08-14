@@ -407,3 +407,172 @@
     font-weight: 600;
     color: #0f172a;
 }
+
+.guest-details-section {
+    width: 100%;
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px 50px;
+}
+
+.guest-details-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+}
+
+.guest-details-header {
+    margin-bottom: 30px;
+}
+
+.guest-details-header h2 {
+    margin: 0 0 8px;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.guest-details-header p {
+    margin: 0;
+    color: #777;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 13px 15px;
+
+    border: 1px solid #ddd;
+    border-radius: 9px;
+
+    font-family: inherit;
+    font-size: 15px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.form-group input:focus {
+    border-color: #b08a45;
+
+    box-shadow:
+        0 0 0 3px rgba(176, 138, 69, 0.1);
+}
+
+.booking-review {
+    margin-top: 30px;
+    padding: 22px;
+
+    background: #fafafa;
+
+    border-radius: 14px;
+}
+
+.booking-review h3 {
+    margin: 0 0 18px;
+
+    font-size: 19px;
+}
+
+.review-row {
+    padding: 7px 0;
+
+    color: #555;
+
+    font-size: 14px;
+}
+
+.review-rooms {
+    margin-top: 12px;
+    padding-top: 12px;
+
+    border-top: 1px solid #e5e5e5;
+}
+
+.review-room {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+
+    padding: 7px 0;
+
+    font-size: 14px;
+}
+
+.review-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-top: 15px;
+    padding-top: 15px;
+
+    border-top: 1px solid #ddd;
+}
+
+.review-total strong {
+    font-size: 20px;
+}
+
+#confirmBookingButton {
+    width: 100%;
+
+    margin-top: 25px;
+    padding: 15px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #b08a45;
+    color: white;
+
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: opacity 0.2s ease;
+}
+
+#confirmBookingButton:hover {
+    opacity: 0.9;
+}
+
+#confirmBookingButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
+@media (max-width: 600px) {
+
+    .guest-details-section {
+        padding: 0 12px 30px;
+    }
+
+    .guest-details-card {
+        padding: 20px;
+    }
+
+    .guest-details-header h2 {
+        font-size: 24px;
+    }
+
+}

@@ -768,12 +768,8 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
 
-            alert(
-                `Selection confirmed!\n\n` +
-                `Total: ${formatCurrency(
-                    data.pricing.totalAmount
-                )}`
-            );
+            continueBooking.disabled = false;
+            continueBooking.textContent = "Continue";
 
 
         }
