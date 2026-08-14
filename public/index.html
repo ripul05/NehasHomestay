@@ -343,6 +343,22 @@
     <script src="js/guests.js"></script>
     <script src="js/availability.js"></script>
     <script src="js/booking-flow.js"></script>
+    <script>
+        function updateParentHeight() {
+            const height = document.body.scrollHeight;
+
+            window.parent.postMessage({
+                type: "BOOKING_HEIGHT",
+                height
+            }, "*");
+        }
+
+        window.onload = updateParentHeight;
+
+        window.onresize = updateParentHeight;
+
+        new ResizeObserver(updateParentHeight).observe(document.body);
+    </script>
 
 
 </body>

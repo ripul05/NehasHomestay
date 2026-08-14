@@ -36,36 +36,23 @@ document.addEventListener("DOMContentLoaded", () => {
      * BACKEND URL
      * ==========================================
      *
-     * LOCAL:
-     *
-     * http://localhost:3000
-     *
-     * Later replace this with your Vercel
-     * backend URL.
+     * LOCAL DEVELOPMENT
      */
 
     const API_BASE_URL =
-        "https://nehas-homestay.vercel.app";
+        // "https://nehas-homestay.vercel.app";
+        "http://localhost:3000";
 
 
     /*
-     * Currently available rooms returned
-     * from the backend.
+     * ==========================================
+     * STATE
+     * ==========================================
      */
 
     let availableRooms = [];
 
-
-    /*
-     * Selected room IDs.
-     */
-
     let selectedRoomIds = [];
-
-
-    /*
-     * Current booking search.
-     */
 
     let currentSearch = null;
 
@@ -98,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             /*
-             * Validate dates.
+             * Validate dates
              */
 
             if (!checkIn || !checkOut) {
@@ -113,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             /*
-             * Validate guests.
+             * Validate adults
              */
 
             if (adults < 1) {
@@ -128,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             /*
-             * Store current search.
+             * Save current search
              */
 
             currentSearch = {
@@ -145,10 +132,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             /*
-             * Loading state.
+             * Loading state
              */
 
-            checkAvailabilityButton.disabled = true;
+            checkAvailabilityButton.disabled =
+                true;
 
             checkAvailabilityButton.textContent =
                 "Checking Availability...";
@@ -183,6 +171,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     await response.json();
 
 
+                /*
+                 * API error
+                 */
+
                 if (!response.ok) {
 
                     throw new Error(
@@ -194,7 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 /*
-                 * Store rooms.
+                 * Save available rooms
                  */
 
                 availableRooms =
@@ -202,21 +194,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 /*
-                 * Clear old selection.
+                 * Reset previous selection
                  */
 
                 selectedRoomIds = [];
 
 
                 /*
-                 * Render rooms.
+                 * Render available rooms
                  */
 
                 renderRooms();
 
 
                 /*
-                 * Show availability section.
+                 * Show availability section
                  */
 
                 availabilitySection.style.display =
@@ -224,7 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 /*
-                 * Update summary.
+                 * Update availability summary
                  */
 
                 availabilitySummary.textContent =
@@ -252,14 +244,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 /*
-                 * Reset selection UI.
+                 * Reset selection summary
                  */
 
                 updateSelectionSummary();
 
 
                 /*
-                 * Scroll to availability.
+                 * Scroll to rooms
                  */
 
                 availabilitySection.scrollIntoView({
@@ -326,7 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         /*
-         * Private rooms.
+         * Private rooms
          */
 
         if (privateRooms.length === 0) {
@@ -355,7 +347,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         /*
-         * Dorm beds.
+         * Dorm beds
          */
 
         if (dormBeds.length === 0) {
@@ -409,11 +401,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="room-selection-info">
 
                 <div class="room-selection-title">
-
                     ${escapeHtml(room.name)}
-
                 </div>
-
 
                 <div class="room-selection-meta">
 
@@ -426,7 +415,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     · Sleeps ${room.capacity}
 
                 </div>
-
 
                 <div class="room-selection-price">
 
@@ -503,7 +491,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (index === -1) {
 
             /*
-             * Select.
+             * Select
              */
 
             selectedRoomIds.push(
@@ -523,7 +511,7 @@ document.addEventListener("DOMContentLoaded", () => {
         else {
 
             /*
-             * Deselect.
+             * Deselect
              */
 
             selectedRoomIds.splice(
@@ -636,21 +624,17 @@ document.addEventListener("DOMContentLoaded", () => {
     /*
      * ==========================================
      * CONTINUE
+     *
+     * ONE CLICK:
+     * Validate selection
+     *       ↓
+     * Show Guest Details
      * ==========================================
      */
 
     continueBooking.addEventListener(
         "click",
         async () => {
-
-            if (
-                selectedRoomIds.length === 0
-            ) {
-
-                return;
-
-            }
-
 
             await validateSelection();
 
@@ -665,6 +649,42 @@ document.addEventListener("DOMContentLoaded", () => {
      */
 
     async function validateSelection() {
+
+        /*
+         * Make sure something is selected.
+         */
+
+        if (
+            selectedRoomIds.length === 0
+        ) {
+
+            alert(
+                "Please select at least one room or bed."
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Make sure we have a search.
+         */
+
+        if (!currentSearch) {
+
+            alert(
+                "Please check availability first."
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Loading state
+         */
 
         continueBooking.disabled =
             true;
@@ -710,7 +730,9 @@ document.addEventListener("DOMContentLoaded", () => {
                         },
 
                         body:
-                            JSON.stringify(payload)
+                            JSON.stringify(
+                                payload
+                            )
 
                     }
                 );
@@ -720,12 +742,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 await response.json();
 
 
+            /*
+             * Selection invalid
+             */
+
             if (!response.ok) {
 
                 /*
-                 * If a room was booked between
-                 * availability and selection,
-                 * refresh availability.
+                 * Room became unavailable.
                  */
 
                 if (
@@ -733,8 +757,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 ) {
 
                     alert(
-                        "One or more selected rooms are no longer available. Please select again."
+                        "One or more selected rooms are no longer available. Please check availability again."
                     );
+
+
+                    /*
+                     * Re-check availability.
+                     */
+
+                    selectedRoomIds = [];
+
+                    updateSelectionSummary();
 
                     checkAvailabilityButton.click();
 
@@ -752,10 +785,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             /*
-             * Store validated selection.
-             *
-             * We'll use this in the next step
-             * when creating the booking.
+             * =====================================
+             * SUCCESS
+             * =====================================
              */
 
             window.bookingSelection =
@@ -768,9 +800,43 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
 
-            continueBooking.disabled = false;
-            continueBooking.textContent = "Continue";
+            /*
+             * Populate guest-details review.
+             */
 
+            if (
+                window.populateBookingReview
+            ) {
+
+                window.populateBookingReview(
+                    data
+                );
+
+            }
+
+
+            /*
+             * Show guest details.
+             */
+
+            const guestDetailsSection =
+                document.getElementById(
+                    "guestDetailsSection"
+                );
+
+
+            if (guestDetailsSection) {
+
+                guestDetailsSection.style.display =
+                    "block";
+
+
+                guestDetailsSection.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+
+            }
 
         }
 
