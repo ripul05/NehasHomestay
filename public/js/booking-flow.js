@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
      */
 
     const API_BASE_URL =
-        process.env.API_BASE_URL;
+        "https://nehas-homestay.vercel.app";
 
 
     /*
