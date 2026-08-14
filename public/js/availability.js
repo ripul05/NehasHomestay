@@ -43,6 +43,18 @@ document.addEventListener("DOMContentLoaded", () => {
         "https://nehas-homestay.vercel.app";
         // "http://localhost:3000";
 
+    const showSwal = (options) => {
+        if (window.Swal) {
+            return window.Swal.fire(options);
+        }
+
+        const message = typeof options === "string"
+            ? options
+            : (options.text || "Action required.");
+
+        alert(message);
+    };
+
 
     /*
      * ==========================================
@@ -90,9 +102,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!checkIn || !checkOut) {
 
-                alert(
-                    "Please select your check-in and check-out dates."
-                );
+                showSwal({
+                    icon: "warning",
+                    title: "Missing dates",
+                    text: "Please select your check-in and check-out dates."
+                });
 
                 return;
 
@@ -105,9 +119,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (adults < 1) {
 
-                alert(
-                    "At least one adult is required."
-                );
+                showSwal({
+                    icon: "warning",
+                    title: "Guest required",
+                    text: "At least one adult is required."
+                });
 
                 return;
 
@@ -269,10 +285,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 );
 
 
-                alert(
-                    error.message ||
-                    "Unable to check availability."
-                );
+                showSwal({
+                    icon: "error",
+                    title: "Availability issue",
+                    text: error.message || "Unable to check availability."
+                });
 
             }
 
@@ -658,9 +675,11 @@ document.addEventListener("DOMContentLoaded", () => {
             selectedRoomIds.length === 0
         ) {
 
-            alert(
-                "Please select at least one room or bed."
-            );
+            showSwal({
+                icon: "warning",
+                title: "No room selected",
+                text: "Please select at least one room or bed."
+            });
 
             return;
 
@@ -673,9 +692,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!currentSearch) {
 
-            alert(
-                "Please check availability first."
-            );
+            showSwal({
+                icon: "warning",
+                title: "Check availability first",
+                text: "Please check availability first."
+            });
 
             return;
 
@@ -756,9 +777,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     response.status === 409
                 ) {
 
-                    alert(
-                        "One or more selected rooms are no longer available. Please check availability again."
-                    );
+                    showSwal({
+                        icon: "warning",
+                        title: "Rooms unavailable",
+                        text: "One or more selected rooms are no longer available. Please check availability again."
+                    });
 
 
                     /*
@@ -848,10 +871,11 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
 
-            alert(
-                error.message ||
-                "Unable to validate selection."
-            );
+            showSwal({
+                icon: "error",
+                title: "Validation failed",
+                text: error.message || "Unable to validate selection."
+            });
 
         }
 

@@ -218,9 +218,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 !window.bookingSelection
             ) {
 
-                alert(
-                    "Your room selection could not be found. Please select your rooms again."
-                );
+                showSwal({
+                    icon: "warning",
+                    title: "Selection missing",
+                    text: "Your room selection could not be found. Please select your rooms again."
+                });
 
                 return;
 
@@ -272,9 +274,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!guestName) {
 
-                alert(
-                    "Please enter your name."
-                );
+                showSwal({
+                    icon: "warning",
+                    title: "Name required",
+                    text: "Please enter your name."
+                });
 
                 return;
 
@@ -283,9 +287,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!email) {
 
-                alert(
-                    "Please enter your email."
-                );
+                showSwal({
+                    icon: "warning",
+                    title: "Email required",
+                    text: "Please enter your email."
+                });
 
                 return;
 
@@ -294,9 +300,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!phone) {
 
-                alert(
-                    "Please enter your phone number."
-                );
+                showSwal({
+                    icon: "warning",
+                    title: "Phone required",
+                    text: "Please enter your phone number."
+                });
 
                 return;
 
@@ -414,9 +422,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         response.status === 409
                     ) {
 
-                        alert(
-                            "Unfortunately, one or more selected rooms are no longer available. Please start the booking again."
-                        );
+                        showSwal({
+                            icon: "warning",
+                            title: "Rooms unavailable",
+                            text: "Unfortunately, one or more selected rooms are no longer available. Please start the booking again."
+                        });
 
 
                         window.location.reload();
@@ -457,17 +467,11 @@ document.addEventListener("DOMContentLoaded", () => {
                  * Razorpay in the next step.
                  */
 
-                alert(
-                    `Booking created successfully!\n\n` +
-                    `Booking Reference: ${
-                        data.booking.bookingReference
-                    }\n\n` +
-                    `Amount: ${
-                        formatCurrency(
-                            data.pricing.totalAmount
-                        )
-                    }`
-                );
+                showSwal({
+                    icon: "success",
+                    title: "Booking created",
+                    text: `Booking Reference: ${data.booking.bookingReference}\nAmount: ${formatCurrency(data.pricing.totalAmount)}`
+                });
 
 
                 /*
@@ -488,10 +492,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 );
 
 
-                alert(
-                    error.message ||
-                    "Unable to create booking."
-                );
+                showSwal({
+                    icon: "error",
+                    title: "Booking failed",
+                    text: error.message || "Unable to create booking."
+                });
 
 
                 confirmBookingButton.disabled =

@@ -335,6 +335,7 @@
 
     <!-- Litepicker -->
     <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- JS -->
     <script src="js/app.js"></script>
@@ -343,21 +344,123 @@
     <script src="js/guests.js"></script>
     <script src="js/availability.js"></script>
     <script src="js/booking-flow.js"></script>
-    <script>
-        function updateParentHeight() {
-            const height = document.body.scrollHeight;
+    <<script>
+    (() => {
+    const BOOKING_HEIGHT_TYPE = "BOOKING_HEIGHT";
+    const MIN_HEIGHT = 700;
+    const MAX_HEIGHT = 2500;
 
-            window.parent.postMessage({
-                type: "BOOKING_HEIGHT",
-                height
-            }, "*");
+    let lastSentHeight = null;
+    let rafId = null;
+
+    function getCurrentDocumentHeight() {
+        const root = document.getElementById("bookingRoot") || document.body;
+        const body = document.body;
+        const docEl = document.documentElement;
+
+        const height = Math.max(
+        root.scrollHeight,
+        root.offsetHeight,
+        body.scrollHeight,
+        body.offsetHeight,
+        docEl.scrollHeight,
+        docEl.offsetHeight,
+        docEl.clientHeight
+        );
+
+        return Math.max(
+        MIN_HEIGHT,
+        Math.min(MAX_HEIGHT, Math.ceil(height + 12))
+        );
+    }
+
+    function updateParentHeight() {
+        const nextHeight = getCurrentDocumentHeight();
+
+        if (lastSentHeight !== null && Math.abs(nextHeight - lastSentHeight) < 2) {
+        return;
         }
 
-        window.onload = updateParentHeight;
+        lastSentHeight = nextHeight;
 
-        window.onresize = updateParentHeight;
+        window.parent.postMessage({
+        type: BOOKING_HEIGHT_TYPE,
+        height: nextHeight
+        }, "*");
+    }
 
-        new ResizeObserver(updateParentHeight).observe(document.body);
+    function scheduleHeightUpdate() {
+        if (rafId) {
+        cancelAnimationFrame(rafId);
+        }
+
+        rafId = requestAnimationFrame(() => {
+        updateParentHeight();
+        rafId = null;
+        });
+    }
+
+    function bindHeightTriggers() {
+        const trigger = () => scheduleHeightUpdate();
+
+        window.addEventListener("load", trigger);
+        window.addEventListener("resize", trigger);
+        window.addEventListener("orientationchange", trigger);
+
+        const calendarButton = document.getElementById("datePickerButton");
+        if (calendarButton) {
+        calendarButton.addEventListener("click", trigger);
+        calendarButton.addEventListener("focusin", trigger);
+        }
+
+        const guestPicker = document.getElementById("guestPicker");
+        if (guestPicker) {
+        guestPicker.addEventListener("click", trigger);
+        guestPicker.addEventListener("keydown", trigger);
+        }
+
+        const guestDropdown = document.getElementById("guestDropdown");
+        if (guestDropdown) {
+        guestDropdown.addEventListener("transitionend", trigger);
+        }
+
+        const checkAvailabilityButton = document.getElementById("checkAvailability");
+        if (checkAvailabilityButton) {
+        checkAvailabilityButton.addEventListener("click", trigger);
+        }
+
+        const continueBooking = document.getElementById("continueBooking");
+        if (continueBooking) {
+        continueBooking.addEventListener("click", trigger);
+        }
+
+        const availabilitySection = document.getElementById("availabilitySection");
+        const guestDetailsSection = document.getElementById("guestDetailsSection");
+
+        const watchNodes = [
+        availabilitySection,
+        guestDetailsSection,
+        document.getElementById("privateRoomsList"),
+        document.getElementById("dormRoomsList"),
+        document.getElementById("selectionSummary")
+        ].filter(Boolean);
+
+        watchNodes.forEach((node) => {
+        const observer = new MutationObserver(() => scheduleHeightUpdate());
+        observer.observe(node, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["style", "class", "hidden", "aria-hidden", "aria-expanded"]
+        });
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        bindHeightTriggers();
+        scheduleHeightUpdate();
+    });
+    })();
     </script>
 
 
