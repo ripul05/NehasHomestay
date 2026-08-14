@@ -40,8 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
      */
 
     const API_BASE_URL =
-        "https://nehas-homestay.vercel.app";
-        // "http://localhost:3000";
+        // "https://nehas-homestay.vercel.app";
+        "http://localhost:3000";
 
     const showSwal = (options) => {
         if (window.Swal) {
@@ -229,6 +229,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 availabilitySection.style.display =
                     "block";
+
+                if (window.bookingWizard) {
+                    window.bookingWizard.showStep(2);
+                }
 
 
                 /*
@@ -853,6 +857,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 guestDetailsSection.style.display =
                     "block";
 
+                if (window.bookingWizard) {
+                    window.bookingWizard.showStep(3);
+                }
 
                 guestDetailsSection.scrollIntoView({
                     behavior: "smooth",

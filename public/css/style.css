@@ -1,31 +1,86 @@
-/* ==========================================
-   BOOKING CARD
-========================================== */
-
-.booking-page{
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    padding:60px 20px;
-    background:#f5f7fa;
+:root {
+    --booking-width: min(1200px, calc(100vw - 32px));
+    --booking-max-height: 820px;
+    --booking-radius: 24px;
+    --booking-padding: 28px;
+    --booking-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+    --booking-bg: #f5f7fa;
+    --booking-surface: #ffffff;
+    --booking-border: rgba(15, 23, 42, 0.06);
+    --booking-step-height: 760px;
 }
 
-.booking-card{
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    background: var(--booking-bg);
+    box-sizing: border-box;
+}
 
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+}
+
+.booking-page {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 16px;
+    background: var(--booking-bg);
+    overflow-x: hidden;
+}
+
+.booking-app {
+    position: relative;
+    width: var(--booking-width);
+    max-width: 1200px;
+    margin: 0 auto;
+    border-radius: var(--booking-radius);
+    background: var(--booking-surface);
+    box-shadow: var(--booking-shadow);
+    overflow: hidden;
+    border: 1px solid var(--booking-border);
+    height: var(--booking-step-height);
+    transition: all 0.35s ease;
+}
+
+.step {
+    display: none;
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+.step.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+    overflow-y: auto;
+}
+
+.booking-card {
     width:100%;
-    max-width:1100px;
-
-    background:#ffffff;
-
-    border-radius:24px;
-
-    padding:45px;
-
-    box-shadow:
-        0 10px 30px rgba(0,0,0,.08),
-        0 30px 60px rgba(0,0,0,.06);
-
+    max-width:100%;
+    background:var(--booking-surface);
+    border-radius:0;
+    padding:var(--booking-padding);
+    box-shadow:none;
+    min-height: 100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
 }
 
 .booking-title{
@@ -59,14 +114,10 @@
 ========================================== */
 
 .booking-form{
-
     display:grid;
-
-    grid-template-columns:
-        repeat(auto-fit,minmax(280px,1fr));
-
+    grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
     gap:25px;
-
+    width:100%;
 }
 
 /* ==========================================
@@ -410,16 +461,65 @@
 
 .guest-details-section {
     width: 100%;
-    max-width: 900px;
-    margin: 40px auto;
-    padding: 0 20px 50px;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
 }
 
 .guest-details-card {
     background: #ffffff;
-    border-radius: 20px;
+    border-radius: 0;
     padding: 30px;
-    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+    box-shadow: none;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.availability-section,
+.guest-details-section {
+    height: 100%;
+}
+
+.availability-card,
+.guest-details-card {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#guestDetailsForm {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 30px;
+    align-items: start;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+#guestDetailsForm .form-group {
+    grid-column: 1;
+}
+
+#guestDetailsForm .booking-review,
+#guestDetailsForm #confirmBookingButton {
+    grid-column: 2;
+}
+
+#guestDetailsForm .booking-review {
+    margin-top: 0;
+}
+
+#guestDetailsForm #confirmBookingButton {
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 10px;
+    z-index: 2;
 }
 
 .guest-details-header {
@@ -561,14 +661,62 @@
 }
 
 
+@media (max-width: 1200px) {
+    .booking-app {
+        width: min(100%, calc(100vw - 24px));
+    }
+}
+
+@media (max-width: 900px) {
+    .booking-app {
+        height: auto;
+        min-height: var(--booking-step-height);
+    }
+
+    .step {
+        height: auto;
+        min-height: 100%;
+        overflow-y: visible;
+    }
+
+    .booking-card {
+        min-height: auto;
+    }
+
+    #guestDetailsForm {
+        grid-template-columns: 1fr;
+    }
+
+    #guestDetailsForm .form-group,
+    #guestDetailsForm .booking-review,
+    #guestDetailsForm #confirmBookingButton {
+        grid-column: auto;
+    }
+}
+
 @media (max-width: 600px) {
+    .booking-page {
+        padding: 12px;
+    }
+
+    .booking-app {
+        width: 100%;
+        border-radius: 18px;
+        height: auto;
+        min-height: auto;
+    }
+
+    .booking-card {
+        padding: 20px 16px;
+        min-height: auto;
+    }
 
     .guest-details-section {
-        padding: 0 12px 30px;
+        padding: 0 0 30px;
     }
 
     .guest-details-card {
-        padding: 20px;
+        padding: 20px 16px;
     }
 
     .guest-details-header h2 {
