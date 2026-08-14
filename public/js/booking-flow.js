@@ -1,34 +1,47 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    const continueBooking =
-        document.getElementById("continueBooking");
-
     const guestDetailsSection =
-        document.getElementById("guestDetailsSection");
+        document.getElementById(
+            "guestDetailsSection"
+        );
 
     const guestDetailsForm =
-        document.getElementById("guestDetailsForm");
+        document.getElementById(
+            "guestDetailsForm"
+        );
 
     const reviewDates =
-        document.getElementById("reviewDates");
+        document.getElementById(
+            "reviewDates"
+        );
 
     const reviewGuests =
-        document.getElementById("reviewGuests");
+        document.getElementById(
+            "reviewGuests"
+        );
 
     const reviewRooms =
-        document.getElementById("reviewRooms");
+        document.getElementById(
+            "reviewRooms"
+        );
 
     const reviewTotal =
-        document.getElementById("reviewTotal");
+        document.getElementById(
+            "reviewTotal"
+        );
 
     const confirmBookingButton =
-        document.getElementById("confirmBookingButton");
+        document.getElementById(
+            "confirmBookingButton"
+        );
 
 
     /*
-     * -----------------------------------------
-     * Backend URL
-     * -----------------------------------------
+     * ==========================================
+     * BACKEND URL
+     * ==========================================
+     *
+     * LOCAL DEVELOPMENT
      */
 
     const API_BASE_URL =
@@ -36,164 +49,157 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-     * -----------------------------------------
-     * Continue after selection validation
-     * -----------------------------------------
+     * ==========================================
+     * POPULATE BOOKING REVIEW
+     *
+     * availability.js calls this after
+     * successful selection validation.
+     * ==========================================
      */
 
-    continueBooking.addEventListener(
-        "click",
-        async () => {
+    window.populateBookingReview =
+        function (selection) {
+
+            const {
+                dates,
+                guests,
+                selectedRooms,
+                pricing
+            } = selection;
+
 
             /*
-             * availability.js already validates
-             * the selection.
-             *
-             * It stores the result here:
-             *
-             * window.bookingSelection
+             * ----------------------------------
+             * Dates
+             * ----------------------------------
              */
 
-            if (!window.bookingSelection) {
+            reviewDates.innerHTML = `
 
-                alert(
-                    "Please validate your room selection first."
+                <strong>
+                    Stay:
+                </strong>
+
+                ${formatDate(
+                    dates.checkIn
+                )}
+
+                →
+
+                ${formatDate(
+                    dates.checkOut
+                )}
+
+                ·
+
+                ${dates.nights}
+
+                ${
+                    dates.nights === 1
+                        ? "night"
+                        : "nights"
+                }
+
+            `;
+
+
+            /*
+             * ----------------------------------
+             * Guests
+             * ----------------------------------
+             */
+
+            reviewGuests.innerHTML = `
+
+                <strong>
+                    Guests:
+                </strong>
+
+                ${guests.adults}
+
+                ${
+                    guests.adults === 1
+                        ? "adult"
+                        : "adults"
+                }
+
+                ${
+                    guests.children > 0
+                        ? `, ${guests.children}
+                           ${
+                               guests.children === 1
+                                   ? "child"
+                                   : "children"
+                           }`
+                        : ""
+                }
+
+            `;
+
+
+            /*
+             * ----------------------------------
+             * Selected rooms
+             * ----------------------------------
+             */
+
+            reviewRooms.innerHTML = `
+
+                <strong>
+                    Selected Rooms
+                </strong>
+
+                ${
+                    selectedRooms
+                        .map(room => `
+
+                            <div
+                                class="review-room"
+                            >
+
+                                <span>
+                                    ${
+                                        escapeHtml(
+                                            room.name
+                                        )
+                                    }
+                                </span>
+
+                                <span>
+                                    ${
+                                        formatCurrency(
+                                            room.total
+                                        )
+                                    }
+                                </span>
+
+                            </div>
+
+                        `)
+                        .join("")
+                }
+
+            `;
+
+
+            /*
+             * ----------------------------------
+             * Total
+             * ----------------------------------
+             */
+
+            reviewTotal.textContent =
+                formatCurrency(
+                    pricing.totalAmount
                 );
 
-                return;
-
-            }
-
-
-            const selection =
-                window.bookingSelection;
-
-
-            /*
-             * Populate review.
-             */
-
-            populateReview(selection);
-
-
-            /*
-             * Show guest details.
-             */
-
-            guestDetailsSection.style.display =
-                "block";
-
-
-            /*
-             * Scroll to guest details.
-             */
-
-            guestDetailsSection.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
-
-        }
-    );
+        };
 
 
     /*
-     * -----------------------------------------
-     * Populate booking review
-     * -----------------------------------------
-     */
-
-    function populateReview(selection) {
-
-        const {
-            dates,
-            guests,
-            selectedRooms,
-            pricing
-        } = selection;
-
-
-        /*
-         * Dates
-         */
-
-        reviewDates.innerHTML = `
-            <strong>Stay:</strong>
-            ${formatDate(dates.checkIn)}
-            →
-            ${formatDate(dates.checkOut)}
-            ·
-            ${dates.nights}
-            ${dates.nights === 1 ? "night" : "nights"}
-        `;
-
-
-        /*
-         * Guests
-         */
-
-        reviewGuests.innerHTML = `
-            <strong>Guests:</strong>
-            ${guests.adults}
-            ${guests.adults === 1 ? "adult" : "adults"}
-            ${
-                guests.children > 0
-                    ? `, ${guests.children}
-                       ${guests.children === 1
-                            ? "child"
-                            : "children"}`
-                    : ""
-            }
-        `;
-
-
-        /*
-         * Rooms
-         */
-
-        reviewRooms.innerHTML = `
-
-            <strong>Selected Rooms</strong>
-
-            ${
-                selectedRooms
-                    .map(room => `
-                        <div class="review-room">
-
-                            <span>
-                                ${escapeHtml(room.name)}
-                            </span>
-
-                            <span>
-                                ${formatCurrency(
-                                    room.total
-                                )}
-                            </span>
-
-                        </div>
-                    `)
-                    .join("")
-            }
-
-        `;
-
-
-        /*
-         * Total
-         */
-
-        reviewTotal.textContent =
-            formatCurrency(
-                pricing.totalAmount
-            );
-
-    }
-
-
-    /*
-     * -----------------------------------------
-     * Submit booking
-     * -----------------------------------------
+     * ==========================================
+     * SUBMIT BOOKING
+     * ==========================================
      */
 
     guestDetailsForm.addEventListener(
@@ -203,10 +209,17 @@ document.addEventListener("DOMContentLoaded", () => {
             event.preventDefault();
 
 
-            if (!window.bookingSelection) {
+            /*
+             * Make sure we have a validated
+             * selection.
+             */
+
+            if (
+                !window.bookingSelection
+            ) {
 
                 alert(
-                    "Your room selection is no longer available. Please start again."
+                    "Your room selection could not be found. Please select your rooms again."
                 );
 
                 return;
@@ -219,30 +232,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             /*
-             * Get guest information.
+             * ----------------------------------
+             * Guest information
+             * ----------------------------------
              */
 
             const guestName =
                 document
-                    .getElementById("guestName")
+                    .getElementById(
+                        "guestName"
+                    )
                     .value
                     .trim();
+
 
             const email =
                 document
-                    .getElementById("guestEmail")
+                    .getElementById(
+                        "guestEmail"
+                    )
                     .value
                     .trim();
 
+
             const phone =
                 document
-                    .getElementById("guestPhone")
+                    .getElementById(
+                        "guestPhone"
+                    )
                     .value
                     .trim();
 
 
             /*
-             * Basic validation.
+             * ----------------------------------
+             * Basic validation
+             * ----------------------------------
              */
 
             if (!guestName) {
@@ -279,7 +304,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             /*
-             * Loading state.
+             * ----------------------------------
+             * Loading state
+             * ----------------------------------
              */
 
             confirmBookingButton.disabled =
@@ -292,15 +319,21 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
 
                 /*
-                 * Build booking payload.
+                 * --------------------------------
+                 * Build booking payload
                  *
                  * IMPORTANT:
-                 * We send room IDs.
                  *
-                 * We do NOT send prices.
+                 * We send:
+                 * - dates
+                 * - guests
+                 * - room IDs
+                 * - guest details
                  *
-                 * The backend calculates the price
-                 * from the database.
+                 * We DO NOT send the price.
+                 *
+                 * Backend calculates the price.
+                 * --------------------------------
                  */
 
                 const payload = {
@@ -331,6 +364,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 };
 
 
+                /*
+                 * --------------------------------
+                 * Create booking
+                 * --------------------------------
+                 */
+
                 const response =
                     await fetch(
                         `${API_BASE_URL}/api/bookings`,
@@ -359,14 +398,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 /*
-                 * Booking failed.
+                 * --------------------------------
+                 * Booking failed
+                 * --------------------------------
                  */
 
                 if (!response.ok) {
 
                     /*
-                     * Someone else may have booked
-                     * one of our selected rooms.
+                     * Someone else booked
+                     * our selected room.
                      */
 
                     if (
@@ -374,13 +415,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     ) {
 
                         alert(
-                            "Unfortunately, one or more selected rooms are no longer available. Please search again."
+                            "Unfortunately, one or more selected rooms are no longer available. Please start the booking again."
                         );
 
-
-                        /*
-                         * Reset the booking flow.
-                         */
 
                         window.location.reload();
 
@@ -398,10 +435,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 /*
-                 * Store booking.
-                 *
-                 * Razorpay will use this in the
-                 * next step.
+                 * --------------------------------
+                 * Booking created
+                 * --------------------------------
                  */
 
                 window.createdBooking =
@@ -415,11 +451,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 /*
-                 * For now we simply show the
-                 * booking reference.
+                 * TEMPORARY
                  *
-                 * Next step:
-                 * Razorpay payment.
+                 * We'll replace this with
+                 * Razorpay in the next step.
                  */
 
                 alert(
@@ -436,7 +471,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 /*
-                 * Change button for now.
+                 * Change button state.
                  */
 
                 confirmBookingButton.textContent =
@@ -472,9 +507,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-     * -----------------------------------------
-     * Helpers
-     * -----------------------------------------
+     * ==========================================
+     * HELPERS
+     * ==========================================
      */
 
     function formatCurrency(amount) {
@@ -493,6 +528,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function formatDate(dateString) {
 
+        /*
+         * Avoid timezone surprises for
+         * YYYY-MM-DD dates.
+         */
+
+        const [
+            year,
+            month,
+            day
+        ] =
+            dateString.split("-");
+
+
+        const date =
+            new Date(
+                Number(year),
+                Number(month) - 1,
+                Number(day)
+            );
+
+
         return new Intl.DateTimeFormat(
             "en-IN",
             {
@@ -500,9 +556,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 month: "short",
                 year: "numeric"
             }
-        ).format(
-            new Date(dateString)
-        );
+        ).format(date);
 
     }
 
