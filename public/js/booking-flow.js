@@ -35,18 +35,34 @@ document.addEventListener("DOMContentLoaded", () => {
             "confirmBookingButton"
         );
 
+        const showSwal = (options) => {
+        if (window.Swal) {
+            return window.Swal.fire(options);
+        }
+
+        const message = typeof options === "string"
+            ? options
+            : (options.text || "Action required.");
+
+        alert(message);
+    };
+
+let paymentCompleted = false;
+
 
     /*
      * ==========================================
      * BACKEND URL
      * ==========================================
-     *
-     * LOCAL DEVELOPMENT
      */
 
+    // const API_BASE_URL =
+    //     "https://nehas-homestay.vercel.app";
+
+    // Local development:
     const API_BASE_URL =
-        "https://nehas-homestay.vercel.app";
-        // "http://localhost:3000";
+        "http://localhost:3000";
+
 
     /*
      * ==========================================
@@ -210,8 +226,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             /*
-             * Make sure we have a validated
-             * selection.
+             * ----------------------------------
+             * Make sure selection exists
+             * ----------------------------------
              */
 
             if (
@@ -219,9 +236,15 @@ document.addEventListener("DOMContentLoaded", () => {
             ) {
 
                 showSwal({
+
                     icon: "warning",
-                    title: "Selection missing",
-                    text: "Your room selection could not be found. Please select your rooms again."
+
+                    title:
+                        "Selection missing",
+
+                    text:
+                        "Your room selection could not be found. Please select your rooms again."
+
                 });
 
                 return;
@@ -275,9 +298,15 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!guestName) {
 
                 showSwal({
+
                     icon: "warning",
-                    title: "Name required",
-                    text: "Please enter your name."
+
+                    title:
+                        "Name required",
+
+                    text:
+                        "Please enter your name."
+
                 });
 
                 return;
@@ -288,9 +317,15 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!email) {
 
                 showSwal({
+
                     icon: "warning",
-                    title: "Email required",
-                    text: "Please enter your email."
+
+                    title:
+                        "Email required",
+
+                    text:
+                        "Please enter your email."
+
                 });
 
                 return;
@@ -301,9 +336,15 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!phone) {
 
                 showSwal({
+
                     icon: "warning",
-                    title: "Phone required",
-                    text: "Please enter your phone number."
+
+                    title:
+                        "Phone required",
+
+                    text:
+                        "Please enter your phone number."
+
                 });
 
                 return;
@@ -327,21 +368,11 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
 
                 /*
-                 * --------------------------------
-                 * Build booking payload
+                 * =================================
+                 * STEP 1
                  *
-                 * IMPORTANT:
-                 *
-                 * We send:
-                 * - dates
-                 * - guests
-                 * - room IDs
-                 * - guest details
-                 *
-                 * We DO NOT send the price.
-                 *
-                 * Backend calculates the price.
-                 * --------------------------------
+                 * Create booking in database
+                 * =================================
                  */
 
                 const payload = {
@@ -372,12 +403,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 };
 
 
-                /*
-                 * --------------------------------
-                 * Create booking
-                 * --------------------------------
-                 */
-
                 const response =
                     await fetch(
                         `${API_BASE_URL}/api/bookings`,
@@ -406,16 +431,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 /*
-                 * --------------------------------
+                 * ----------------------------------
                  * Booking failed
-                 * --------------------------------
+                 * ----------------------------------
                  */
 
                 if (!response.ok) {
 
                     /*
-                     * Someone else booked
-                     * our selected room.
+                     * Someone else booked one
+                     * of the selected rooms.
                      */
 
                     if (
@@ -423,9 +448,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     ) {
 
                         showSwal({
+
                             icon: "warning",
-                            title: "Rooms unavailable",
-                            text: "Unfortunately, one or more selected rooms are no longer available. Please start the booking again."
+
+                            title:
+                                "Rooms unavailable",
+
+                            text:
+                                "Unfortunately, one or more selected rooms are no longer available. Please start the booking again."
+
                         });
 
 
@@ -445,9 +476,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 /*
-                 * --------------------------------
-                 * Booking created
-                 * --------------------------------
+                 * ----------------------------------
+                 * Save created booking
+                 * ----------------------------------
                  */
 
                 window.createdBooking =
@@ -461,41 +492,109 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 /*
-                 * TEMPORARY
+                 * =================================
+                 * STEP 2
                  *
-                 * We'll replace this with
-                 * Razorpay in the next step.
-                 */
-
-                showSwal({
-                    icon: "success",
-                    title: "Booking created",
-                    text: `Booking Reference: ${data.booking.bookingReference}\nAmount: ${formatCurrency(data.pricing.totalAmount)}`
-                });
-
-
-                /*
-                 * Change button state.
+                 * Create Razorpay Order
+                 * =================================
                  */
 
                 confirmBookingButton.textContent =
-                    "Booking Created";
+                    "Preparing Payment...";
 
+
+                const paymentResponse =
+                    await fetch(
+                        `${API_BASE_URL}/api/payments/create-order`,
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    bookingId:
+                                        data.booking.id
+
+                                })
+
+                        }
+                    );
+
+
+                const paymentData =
+                    await paymentResponse.json();
+
+
+                /*
+                 * ----------------------------------
+                 * Razorpay order failed
+                 * ----------------------------------
+                 */
+
+                if (
+                    !paymentResponse.ok
+                ) {
+
+                    throw new Error(
+                        paymentData.error ||
+                        "Unable to create payment order."
+                    );
+
+                }
+
+
+                console.log(
+                    "Razorpay order created:",
+                    paymentData
+                );
+
+
+                /*
+                 * =================================
+                 * STEP 3
+                 *
+                 * Open Razorpay Checkout
+                 * =================================
+                 */
+
+                openRazorpayCheckout(
+                    paymentData,
+                    data,
+                    guestName,
+                    email,
+                    phone
+                );
 
             }
+
 
             catch (error) {
 
                 console.error(
-                    "Booking error:",
+                    "Booking/payment error:",
                     error
                 );
 
 
                 showSwal({
+
                     icon: "error",
-                    title: "Booking failed",
-                    text: error.message || "Unable to create booking."
+
+                    title:
+                        "Payment failed",
+
+                    text:
+                        error.message ||
+                        "Unable to proceed with payment."
+
                 });
 
 
@@ -509,6 +608,431 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
     );
+
+
+    /*
+     * ==========================================
+     * OPEN RAZORPAY CHECKOUT
+     * ==========================================
+     */
+
+    function openRazorpayCheckout(
+        paymentData,
+        bookingData,
+        guestName,
+        email,
+        phone
+    ) {
+
+        paymentCompleted = false;
+
+        /*
+         * Make sure Razorpay Checkout script
+         * has loaded.
+         */
+
+        if (
+            typeof Razorpay ===
+            "undefined"
+        ) {
+
+            showSwal({
+
+                icon: "error",
+
+                title:
+                    "Payment unavailable",
+
+                text:
+                    "Razorpay Checkout could not be loaded. Please try again."
+
+            });
+
+
+            confirmBookingButton.disabled =
+                false;
+
+            confirmBookingButton.textContent =
+                "Confirm & Proceed to Payment";
+
+            return;
+
+        }
+
+
+        /*
+         * ----------------------------------
+         * Razorpay options
+         * ----------------------------------
+         */
+
+        const options = {
+
+            /*
+             * Razorpay public Key ID.
+             *
+             * This is safe to expose to frontend.
+             */
+
+            key:
+                paymentData.keyId,
+
+
+            /*
+             * Razorpay Order ID generated
+             * by our backend.
+             */
+
+            order_id:
+                paymentData.razorpayOrderId,
+
+
+            /*
+             * Amount in paise.
+             *
+             * Example:
+             *
+             * ₹3000 = 300000 paise
+             */
+
+            amount:
+                paymentData.amount,
+
+
+            /*
+             * Currency
+             */
+
+            currency:
+                paymentData.currency,
+
+
+            /*
+             * Merchant information
+             */
+
+            name:
+                "Neha's Homestay",
+
+            description:
+                `Booking ${bookingData.booking.bookingReference}`,
+
+
+            /*
+             * ----------------------------------
+             * Prefill guest information
+             * ----------------------------------
+             */
+
+            prefill: {
+
+                name:
+                    guestName,
+
+                email:
+                    email,
+
+                contact:
+                    phone
+
+            },
+
+
+            /*
+             * ----------------------------------
+             * Razorpay notes
+             * ----------------------------------
+             */
+
+            notes: {
+
+                booking_id:
+                    String(
+                        bookingData.booking.id
+                    ),
+
+                booking_reference:
+                    bookingData
+                        .booking
+                        .bookingReference
+
+            },
+
+
+            /*
+             * ----------------------------------
+             * Temporary payment handler
+             *
+             * IMPORTANT:
+             *
+             * We DO NOT confirm the booking
+             * here.
+             *
+             * The next step will send these
+             * details to our backend for
+             * signature verification.
+             * ----------------------------------
+             */
+
+            handler: async function (response) {
+                paymentCompleted = true;
+
+                console.log(
+                    "Razorpay payment response:",
+                    response
+                );
+
+
+                try {
+
+                    confirmBookingButton.textContent =
+                        "Verifying Payment...";
+
+
+                    /*
+                     * Send Razorpay response to backend
+                     */
+
+                    const verifyResponse =
+                        await fetch(
+                            `${API_BASE_URL}/api/payments/verify`,
+                            {
+
+                                method: "POST",
+
+                                headers: {
+
+                                    "Content-Type":
+                                        "application/json"
+
+                                },
+
+                                body:
+                                    JSON.stringify({
+
+                                        bookingId:
+                                            bookingData.booking.id,
+
+                                        razorpay_payment_id:
+                                            response.razorpay_payment_id,
+
+                                        razorpay_order_id:
+                                            response.razorpay_order_id,
+
+                                        razorpay_signature:
+                                            response.razorpay_signature
+
+                                    })
+
+                            }
+                        );
+
+
+                    const verifyData =
+                        await verifyResponse.json();
+
+
+                    /*
+                     * Verification failed
+                     */
+
+                    if (!verifyResponse.ok) {
+
+                        throw new Error(
+                            verifyData.error ||
+                            "Payment verification failed."
+                        );
+
+                    }
+
+
+                    /*
+                     * Payment successfully verified
+                     */
+
+                    console.log(
+                        "Payment verified:",
+                        verifyData
+                    );
+
+
+                    /*
+                     * Store payment result
+                     */
+
+                    window.paymentVerification =
+                        verifyData;
+
+
+                    /*
+                     * Update button
+                     */
+
+                    confirmBookingButton.textContent =
+                        "Booking Confirmed";
+
+
+                    /*
+                     * Show success
+                     */
+
+                    showSwal({
+
+                        icon: "success",
+
+                        title:
+                            "Booking Confirmed!",
+
+                        text:
+                            `Your booking ${bookingData.booking.bookingReference
+                            } has been confirmed.`
+
+                    });
+
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "Payment verification error:",
+                        error
+                    );
+
+
+                    confirmBookingButton.disabled =
+                        false;
+
+                    confirmBookingButton.textContent =
+                        "Confirm & Proceed to Payment";
+
+
+                    showSwal({
+
+                        icon: "error",
+
+                        title:
+                            "Payment Verification Failed",
+
+                        text:
+                            error.message ||
+                            "We could not verify your payment. Please contact us if money was deducted."
+
+                    });
+
+                }
+
+            },
+
+
+            /*
+             * ----------------------------------
+             * Checkout closed
+             * ----------------------------------
+             */
+
+            modal: {
+
+                ondismiss:
+                    function () {
+
+                        if (paymentCompleted) {
+                            return;
+                        }
+
+                        console.log(
+                            "Razorpay checkout closed."
+                        );
+
+
+                        confirmBookingButton.disabled =
+                            false;
+
+                        confirmBookingButton.textContent =
+                            "Confirm & Proceed to Payment";
+
+                    }
+
+            },
+
+
+            /*
+             * ----------------------------------
+             * Theme
+             * ----------------------------------
+             */
+
+            theme: {
+
+                color:
+                    "#b08a45"
+
+            }
+
+        };
+
+
+        /*
+         * Create Razorpay instance.
+         */
+
+        const razorpay =
+            new Razorpay(
+                options
+            );
+
+
+        /*
+         * ----------------------------------
+         * Payment failed
+         * ----------------------------------
+         */
+
+        razorpay.on(
+            "payment.failed",
+            function (response) {
+
+                console.error(
+                    "Razorpay payment failed:",
+                    response.error
+                );
+
+
+                showSwal({
+
+                    icon: "error",
+
+                    title:
+                        "Payment failed",
+
+                    text:
+                        response.error &&
+                        response.error.description
+                            ? response.error.description
+                            : "Payment failed. Please try again."
+
+                });
+
+
+                confirmBookingButton.disabled =
+                    false;
+
+                confirmBookingButton.textContent =
+                    "Confirm & Proceed to Payment";
+
+            }
+        );
+
+
+        /*
+         * ----------------------------------
+         * Open Razorpay
+         * ----------------------------------
+         */
+
+        razorpay.open();
+
+    }
 
 
     /*
@@ -534,8 +1058,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function formatDate(dateString) {
 
         /*
-         * Avoid timezone surprises for
-         * YYYY-MM-DD dates.
+         * Avoid timezone problems with
+         * YYYY-MM-DD.
          */
 
         const [

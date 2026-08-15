@@ -11,10 +11,16 @@ const availabilityRoutes =
   require("./routes/AvailabilityRoutes");
 const bookingRoutes =
   require("./routes/BookingRoutes");
+  const paymentRoutes =
+    require("./routes/PaymentRoutes");
 
 
 app.use("/api", availabilityRoutes);
 app.use("/api", bookingRoutes);
+app.use(
+    "/api",
+    paymentRoutes
+);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
