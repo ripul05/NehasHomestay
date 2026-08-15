@@ -32,6 +32,7 @@
 
         lastSentHeight = nextHeight;
 
+        console.log("Sending height:", nextHeight);
         window.parent.postMessage({
             type: BOOKING_HEIGHT_TYPE,
             height: nextHeight

@@ -45,8 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
      */
 
     const API_BASE_URL =
-        "https://nehas-homestay.vercel.app";
-        // "http://localhost:3000";
+        // "https://nehas-homestay.vercel.app";
+        "http://localhost:3000";
 
     /*
      * ==========================================
