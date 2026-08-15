@@ -15,12 +15,12 @@
 
 #bookingRoot .booking-app {
     display: grid; grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.7fr);
-    width: min(1180px, 100%); height: auto; min-height: 0; margin: 0 auto;
-    overflow: visible; background: var(--nh-surface); border: 1px solid var(--nh-border);
+    width: min(1180px, 100%); height: var(--nh-widget-height); min-height: 0; margin: 0 auto;
+    overflow: hidden; background: var(--nh-surface); border: 1px solid var(--nh-border);
     border-radius: var(--nh-radius-lg); box-shadow: var(--nh-shadow-md);
 }
 #bookingRoot .booking-side {
-    display: flex; flex-direction: column; min-height: 100%; overflow: visible;
+    display: flex; flex-direction: column; min-height: 0; overflow: hidden;
     color: #fff; background: linear-gradient(165deg, #34483d 0%, #22332b 100%);
     border-radius: var(--nh-radius-lg) 0 0 var(--nh-radius-lg);
 }
@@ -36,7 +36,7 @@
 #bookingRoot .booking-side-text { margin: 0; color: rgba(255,255,255,.78); }
 #bookingRoot .booking-side-amenities { display: grid; gap: var(--nh-space-2); margin: var(--nh-space-5) 0; padding: 0; list-style: none; }
 #bookingRoot .booking-side-quote { padding-top: var(--nh-space-3); border-top: 1px solid rgba(255,255,255,.2); color: rgba(255,255,255,.8); font-size: 14px; font-style: italic; }
-#bookingRoot .booking-content { min-width: 0; overflow: visible; }
+#bookingRoot .booking-content { min-width: 0; min-height: 0; height: 100%; overflow-x: hidden; overflow-y: auto; scrollbar-gutter: stable; }
 
 #bookingRoot .step { display: none; width: 100%; height: auto; min-height: 0; overflow: visible; opacity: 0; transform: translateY(12px); }
 #bookingRoot .step.active { display: block; opacity: 1; transform: translateY(0); animation: nh-enter .32s ease both; }
@@ -115,19 +115,14 @@
 
 @media (max-width: 900px) {
     #bookingRoot .booking-app { grid-template-columns: 1fr; }
-    #bookingRoot .booking-side { border-radius: var(--nh-radius-lg) var(--nh-radius-lg) 0 0; }
-    #bookingRoot .booking-side-image { min-height: 130px; }
-    #bookingRoot .booking-side-content { padding: var(--nh-space-4); }
-    #bookingRoot .booking-side-amenities, #bookingRoot .booking-side-quote { display: none; }
-    #bookingRoot .booking-card, #bookingRoot .availability-card, #bookingRoot .guest-details-card { border-radius: 0 0 var(--nh-radius-lg) var(--nh-radius-lg); }
+    #bookingRoot .booking-side { display: none; }
+    #bookingRoot .booking-card, #bookingRoot .availability-card, #bookingRoot .guest-details-card { border-radius: var(--nh-radius-lg); }
     #bookingRoot #guestDetailsForm { grid-template-columns: 1fr; }
     #bookingRoot #guestDetailsForm .form-row, #bookingRoot #guestDetailsForm > .form-group, #bookingRoot #guestDetailsForm .booking-review, #bookingRoot #guestDetailsForm #confirmBookingButton { grid-column: 1; }
 }
 @media (max-width: 600px) {
     #bookingRoot { padding: 12px; } #bookingRoot .booking-app { border-radius: var(--nh-radius-md); }
-    #bookingRoot .booking-side { border-radius: var(--nh-radius-md) var(--nh-radius-md) 0 0; } #bookingRoot .booking-side-image { min-height: 100px; }
-    #bookingRoot .booking-side-content { padding: var(--nh-space-3); } #bookingRoot .booking-side-title { font-size: 24px; }
-    #bookingRoot .booking-card, #bookingRoot .availability-card, #bookingRoot .guest-details-card { padding: var(--nh-space-4); border-radius: 0 0 var(--nh-radius-md) var(--nh-radius-md); }
+    #bookingRoot .booking-card, #bookingRoot .availability-card, #bookingRoot .guest-details-card { padding: var(--nh-space-4); border-radius: var(--nh-radius-md); }
     #bookingRoot .booking-form, #bookingRoot .booking-highlights, #bookingRoot #guestDetailsForm .form-row { grid-template-columns: 1fr; }
     #bookingRoot .room-selection-card { align-items: flex-start; flex-direction: column; } #bookingRoot .room-select-button { width: 100%; }
 }
