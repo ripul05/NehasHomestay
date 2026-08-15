@@ -1,1 +1,1 @@
-console.log('Neha\'s booking app loaded');
+console.log('Neha\'s booking app loaded')

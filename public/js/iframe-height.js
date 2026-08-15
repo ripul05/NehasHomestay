@@ -1,7 +1,6 @@
 (() => {
     const BOOKING_HEIGHT_TYPE = "BOOKING_HEIGHT";
     const MIN_HEIGHT = 700;
-    const MAX_HEIGHT = 2500;
 
     let lastSentHeight = null;
     let rafId = null;
@@ -21,10 +20,7 @@
             docEl.clientHeight
         );
 
-        return Math.max(
-            MIN_HEIGHT,
-            Math.min(MAX_HEIGHT, Math.ceil(height + 12))
-        );
+        return Math.max(MIN_HEIGHT, Math.ceil(height + 12));
     }
 
     function updateParentHeight() {
@@ -92,6 +88,10 @@
                 attributeFilter: ["style", "class", "hidden", "aria-hidden", "aria-expanded"]
             });
         });
+
+        if ("ResizeObserver" in window) {
+            new ResizeObserver(trigger).observe(document.getElementById("bookingRoot") || document.body);
+        }
     }
 
     window.updateParentHeight = updateParentHeight;

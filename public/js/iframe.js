@@ -8,7 +8,7 @@ function getVisibleContentHeight() {
     const bodyHeight = document.body?.scrollHeight || 0;
 
     const measuredHeight = Math.max(containerHeight, viewportHeight, bodyHeight);
-    return Math.ceil(Math.min(4000, Math.max(600, measuredHeight + 8)));
+    return Math.ceil(Math.max(600, measuredHeight + 8));
 }
 
 function sendHeight() {
@@ -42,8 +42,6 @@ const observer = new ResizeObserver(() => {
 });
 
 if (document.body) {
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
     observer.observe(document.body);
 }
 
