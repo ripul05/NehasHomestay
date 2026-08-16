@@ -880,7 +880,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             showSwal({
                 icon: "error",
-                title: "Validation failed",
+                title: "Booking Could Not Be Completed",
                 text: error.message || "Unable to validate selection."
             });
 

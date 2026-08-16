@@ -3,13 +3,19 @@ const express = require("express");
 const router = express.Router();
 
 const availabilityRepository =
-    require("../Database/AvailabilityRepo");
+    require("../database/AvailabilityRepo");
 
 const selectionRepository =
-    require("../Database/SelectionRepo");
+    require("../database/SelectionRepo");
+const { createRateLimiter } = require("../middleware/rateLimit");
+const { validateStayDates } = require("../utils/bookingValidation");
 
 
-router.post("/availability", async (req, res) => {
+router.post("/availability", createRateLimiter({
+    windowMs: 60 * 1000,
+    max: 30,
+    message: "Too many availability searches. Please wait a minute."
+}), async (req, res) => {
 
     try {
 
@@ -19,6 +25,11 @@ router.post("/availability", async (req, res) => {
             adults = 1,
             children = 0
         } = req.body;
+
+        const stay = validateStayDates(checkIn, checkOut);
+        if (stay.error) {
+            return res.status(400).json({ success: false, error: stay.error });
+        }
 
 
         /*
@@ -165,7 +176,11 @@ router.post("/availability", async (req, res) => {
 
 });
 
-router.post("/validate-selection", async (req, res) => {
+router.post("/validate-selection", createRateLimiter({
+    windowMs: 60 * 1000,
+    max: 20,
+    message: "Too many selection attempts. Please wait a minute."
+}), async (req, res) => {
 
     try {
 
@@ -176,6 +191,11 @@ router.post("/validate-selection", async (req, res) => {
             children = 0,
             roomIds
         } = req.body;
+
+        const stay = validateStayDates(checkIn, checkOut);
+        if (stay.error) {
+            return res.status(400).json({ success: false, error: stay.error });
+        }
 
 
         /*

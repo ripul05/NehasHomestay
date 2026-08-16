@@ -48,9 +48,10 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
 let paymentCompleted = false;
+let activePaymentAttemptId = 0;
 
 
-    /*
+/*
      * ==========================================
      * BACKEND URL
      * ==========================================
@@ -267,8 +268,8 @@ let paymentCompleted = false;
                     .getElementById(
                         "guestName"
                     )
-                    .value
-                    .trim();
+                .value
+                .trim();
 
 
             const email =
@@ -276,8 +277,8 @@ let paymentCompleted = false;
                     .getElementById(
                         "guestEmail"
                     )
-                    .value
-                    .trim();
+                .value
+                .trim();
 
 
             const phone =
@@ -285,8 +286,8 @@ let paymentCompleted = false;
                     .getElementById(
                         "guestPhone"
                     )
-                    .value
-                    .trim();
+                .value
+                .trim();
 
 
             /*
@@ -408,9 +409,9 @@ let paymentCompleted = false;
                         `${API_BASE_URL}/api/bookings`,
                         {
 
-                            method: "POST",
+                    method: "POST",
 
-                            headers: {
+                    headers: {
 
                                 "Content-Type":
                                     "application/json"
@@ -508,22 +509,14 @@ let paymentCompleted = false;
                         `${API_BASE_URL}/api/payments/create-order`,
                         {
 
-                            method: "POST",
-
-                            headers: {
-
-                                "Content-Type":
-                                    "application/json"
-
-                            },
-
-                            body:
-                                JSON.stringify({
-
-                                    bookingId:
-                                        data.booking.id
-
-                                })
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        bookingId: data.booking.id,
+                        bookingAccessToken: data.booking.accessToken
+                    })
 
                         }
                     );
@@ -539,22 +532,11 @@ let paymentCompleted = false;
                  * ----------------------------------
                  */
 
-                if (
-                    !paymentResponse.ok
-                ) {
-
-                    throw new Error(
-                        paymentData.error ||
-                        "Unable to create payment order."
-                    );
-
+                if (!paymentResponse.ok) {
+                    throw new Error(paymentData.error || "Unable to create payment order.");
                 }
 
-
-                console.log(
-                    "Razorpay order created:",
-                    paymentData
-                );
+                console.log("Razorpay order created:", paymentData);
 
 
                 /*
@@ -573,481 +555,180 @@ let paymentCompleted = false;
                     phone
                 );
 
-            }
+            } catch (error) {
 
-
-            catch (error) {
-
-                console.error(
-                    "Booking/payment error:",
-                    error
-                );
-
+                console.error("Booking/payment error:", error);
 
                 showSwal({
-
                     icon: "error",
-
-                    title:
-                        "Payment failed",
-
-                    text:
-                        error.message ||
-                        "Unable to proceed with payment."
-
+                    title: "Booking failed",
+                    text: error.message || "Unable to create or process this booking."
                 });
 
-
-                confirmBookingButton.disabled =
-                    false;
-
-                confirmBookingButton.textContent =
-                    "Confirm & Proceed to Payment";
-
+                confirmBookingButton.disabled = false;
+                confirmBookingButton.textContent = "Confirm & Proceed to Payment";
             }
-
         }
     );
 
+    function openRazorpayCheckout(paymentData, bookingData, guestName, email, phone) {
 
-    /*
-     * ==========================================
-     * OPEN RAZORPAY CHECKOUT
-     * ==========================================
-     */
-
-    function openRazorpayCheckout(
-        paymentData,
-        bookingData,
-        guestName,
-        email,
-        phone
-    ) {
+        const attemptId = ++activePaymentAttemptId;
+        const isCurrentAttempt = () => attemptId === activePaymentAttemptId;
 
         paymentCompleted = false;
 
-        /*
-         * Make sure Razorpay Checkout script
-         * has loaded.
-         */
-
-        if (
-            typeof Razorpay ===
-            "undefined"
-        ) {
+        if (typeof Razorpay === "undefined") {
 
             showSwal({
-
                 icon: "error",
-
-                title:
-                    "Payment unavailable",
-
-                text:
-                    "Razorpay Checkout could not be loaded. Please try again."
-
+                title: "Payment unavailable",
+                text: "Razorpay Checkout could not be loaded. Please try again."
             });
 
-
-            confirmBookingButton.disabled =
-                false;
-
-            confirmBookingButton.textContent =
-                "Confirm & Proceed to Payment";
-
+            confirmBookingButton.disabled = false;
+            confirmBookingButton.textContent = "Confirm & Proceed to Payment";
             return;
-
         }
 
-
-        /*
-         * ----------------------------------
-         * Razorpay options
-         * ----------------------------------
-         */
-
         const options = {
-
-            /*
-             * Razorpay public Key ID.
-             *
-             * This is safe to expose to frontend.
-             */
-
-            key:
-                paymentData.keyId,
-
-
-            /*
-             * Razorpay Order ID generated
-             * by our backend.
-             */
-
-            order_id:
-                paymentData.razorpayOrderId,
-
-
-            /*
-             * Amount in paise.
-             *
-             * Example:
-             *
-             * ₹3000 = 300000 paise
-             */
-
-            amount:
-                paymentData.amount,
-
-
-            /*
-             * Currency
-             */
-
-            currency:
-                paymentData.currency,
-
-
-            /*
-             * Merchant information
-             */
-
-            name:
-                "Neha's Homestay",
-
-            description:
-                `Booking ${bookingData.booking.bookingReference}`,
-
-
-            /*
-             * ----------------------------------
-             * Prefill guest information
-             * ----------------------------------
-             */
-
+            key: paymentData.keyId,
+            order_id: paymentData.razorpayOrderId,
+            amount: paymentData.amount,
+            currency: paymentData.currency,
+            name: "Neha's Homestay",
+            description: `Booking ${bookingData.booking.bookingReference}`,
             prefill: {
-
-                name:
-                    guestName,
-
-                email:
-                    email,
-
-                contact:
-                    phone
-
+                name: guestName,
+                email: email,
+                contact: phone
             },
-
-
-            /*
-             * ----------------------------------
-             * Razorpay notes
-             * ----------------------------------
-             */
-
             notes: {
-
-                booking_id:
-                    String(
-                        bookingData.booking.id
-                    ),
-
-                booking_reference:
-                    bookingData
-                        .booking
-                        .bookingReference
-
+                booking_id: String(bookingData.booking.id),
+                booking_reference: bookingData.booking.bookingReference
             },
-
-
-            /*
-             * ----------------------------------
-             * Temporary payment handler
-             *
-             * IMPORTANT:
-             *
-             * We DO NOT confirm the booking
-             * here.
-             *
-             * The next step will send these
-             * details to our backend for
-             * signature verification.
-             * ----------------------------------
-             */
-
             handler: async function (response) {
+                if (!isCurrentAttempt()) {
+                    return;
+                }
+
                 paymentCompleted = true;
 
-                console.log(
-                    "Razorpay payment response:",
-                    response
-                );
-
+                console.log("Razorpay payment response:", response);
 
                 try {
+                    confirmBookingButton.textContent = "Verifying Payment...";
 
-                    confirmBookingButton.textContent =
-                        "Verifying Payment...";
+                    const verifyResponse = await fetch(`${API_BASE_URL}/api/payments/verify`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            bookingId: bookingData.booking.id,
+                            bookingAccessToken: bookingData.booking.accessToken,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_signature: response.razorpay_signature
+                        })
+                    });
 
-
-                    /*
-                     * Send Razorpay response to backend
-                     */
-
-                    const verifyResponse =
-                        await fetch(
-                            `${API_BASE_URL}/api/payments/verify`,
-                            {
-
-                                method: "POST",
-
-                                headers: {
-
-                                    "Content-Type":
-                                        "application/json"
-
-                                },
-
-                                body:
-                                    JSON.stringify({
-
-                                        bookingId:
-                                            bookingData.booking.id,
-
-                                        razorpay_payment_id:
-                                            response.razorpay_payment_id,
-
-                                        razorpay_order_id:
-                                            response.razorpay_order_id,
-
-                                        razorpay_signature:
-                                            response.razorpay_signature
-
-                                    })
-
-                            }
-                        );
-
-
-                    const verifyData =
-                        await verifyResponse.json();
-
-
-                    /*
-                     * Verification failed
-                     */
-
-                    if (!verifyResponse.ok) {
-
-                        throw new Error(
-                            verifyData.error ||
-                            "Payment verification failed."
-                        );
-
+                    if (!isCurrentAttempt()) {
+                        return;
                     }
 
+                    const verifyData = await verifyResponse.json();
 
-                    /*
-                     * Payment successfully verified
-                     */
+                    if (!isCurrentAttempt()) {
+                        return;
+                    }
 
-                    console.log(
-                        "Payment verified:",
-                        verifyData
-                    );
+                    if (!verifyResponse.ok) {
+                        throw new Error(verifyData.error || "Payment verification failed.");
+                    }
 
+                    console.log("Payment verified:", verifyData);
+                    window.paymentVerification = verifyData;
 
-                    /*
-                     * Store payment result
-                     */
+                    confirmBookingButton.textContent = "Booking Confirmed";
 
-                    window.paymentVerification =
-                        verifyData;
-
-
-                    /*
-                     * Update button
-                     */
-
-                    confirmBookingButton.textContent =
-                        "Booking Confirmed";
-
-
-                    /*
-                     * Show success
-                     */
-
-                    await Promise.resolve(showSwal({
-
+                    await showSwal({
                         icon: "success",
+                        title: "Booking Confirmed!",
+                        text: `Your booking ${bookingData.booking.bookingReference} has been confirmed.`
+                    });
 
-                        title:
-                            "Booking Confirmed!",
+                    if (!isCurrentAttempt()) {
+                        return;
+                    }
 
-                        text:
-                            `Your booking ${bookingData.booking.bookingReference
-                            } has been confirmed.`
-
-                    }));
-
-                    /*
-                     * The payment is complete, so return the customer to
-                     * the first screen after they dismiss the confirmation.
-                     * This also removes the completed guest-details form
-                     * from view before a new booking begins.
-                     */
                     confirmBookingButton.disabled = false;
-                    confirmBookingButton.textContent =
-                        "Confirm & Proceed to Payment";
+                    confirmBookingButton.textContent = "Confirm & Proceed to Payment";
 
                     if (window.bookingWizard) {
                         window.bookingWizard.showStep(1);
                     }
 
+                } catch (error) {
+                    console.error("Payment verification error:", error);
 
-                }
-
-                catch (error) {
-
-                    console.error(
-                        "Payment verification error:",
-                        error
-                    );
-
-
-                    confirmBookingButton.disabled =
-                        false;
-
-                    confirmBookingButton.textContent =
-                        "Confirm & Proceed to Payment";
-
-
-                    showSwal({
-
-                        icon: "error",
-
-                        title:
-                            "Payment Verification Failed",
-
-                        text:
-                            error.message ||
-                            "We could not verify your payment. Please contact us if money was deducted."
-
-                    });
-
-                }
-
-            },
-
-
-            /*
-             * ----------------------------------
-             * Checkout closed
-             * ----------------------------------
-             */
-
-            modal: {
-
-                ondismiss:
-                    function () {
-
-                        if (paymentCompleted) {
-                            return;
-                        }
-
-                        console.log(
-                            "Razorpay checkout closed."
-                        );
-
-
-                        confirmBookingButton.disabled =
-                            false;
-
-                        confirmBookingButton.textContent =
-                            "Confirm & Proceed to Payment";
-
+                    if (!isCurrentAttempt()) {
+                        return;
                     }
 
+                    showSwal({
+                        icon: "error",
+                        title: "Payment Verification Failed",
+                        text: error.message || "We could not verify your payment. Please contact us if money was deducted."
+                    });
+
+                    confirmBookingButton.disabled = false;
+                    confirmBookingButton.textContent = "Confirm & Proceed to Payment";
+                }
             },
+            modal: {
+                ondismiss: function () {
+                    if (!isCurrentAttempt()) {
+                        return;
+                    }
 
+                    if (paymentCompleted) {
+                        return;
+                    }
 
-            /*
-             * ----------------------------------
-             * Theme
-             * ----------------------------------
-             */
-
+                    console.log("Razorpay checkout closed.");
+                    confirmBookingButton.disabled = false;
+                    confirmBookingButton.textContent = "Confirm & Proceed to Payment";
+                }
+            },
             theme: {
-
-                color:
-                    "#b08a45"
-
+                color: "#b08a45"
             }
-
         };
 
+        const razorpay = new Razorpay(options);
 
-        /*
-         * Create Razorpay instance.
-         */
-
-        const razorpay =
-            new Razorpay(
-                options
-            );
-
-
-        /*
-         * ----------------------------------
-         * Payment failed
-         * ----------------------------------
-         */
-
-        razorpay.on(
-            "payment.failed",
-            function (response) {
-
-                console.error(
-                    "Razorpay payment failed:",
-                    response.error
-                );
-
-
-                showSwal({
-
-                    icon: "error",
-
-                    title:
-                        "Payment failed",
-
-                    text:
-                        response.error &&
-                        response.error.description
-                            ? response.error.description
-                            : "Payment failed. Please try again."
-
-                });
-
-
-                confirmBookingButton.disabled =
-                    false;
-
-                confirmBookingButton.textContent =
-                    "Confirm & Proceed to Payment";
-
+        razorpay.on("payment.failed", function (response) {
+            if (!isCurrentAttempt()) {
+                return;
             }
-        );
 
+            console.error("Razorpay payment failed:", response.error);
 
-        /*
-         * ----------------------------------
-         * Open Razorpay
-         * ----------------------------------
-         */
+            showSwal({
+                icon: "error",
+                title: "Payment failed",
+                text: response.error && response.error.description
+                    ? response.error.description
+                    : "Payment failed. Please try again."
+            });
+
+            confirmBookingButton.disabled = false;
+            confirmBookingButton.textContent = "Confirm & Proceed to Payment";
+        });
 
         razorpay.open();
-
     }
-
 
     /*
      * ==========================================

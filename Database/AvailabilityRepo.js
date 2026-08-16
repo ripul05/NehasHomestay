@@ -38,9 +38,12 @@ async function getAvailableRooms(checkIn, checkOut) {
 
             WHERE br.room_id = r.id
 
-            AND b.booking_status IN (
-                'PENDING',
-                'CONFIRMED'
+            AND (
+                b.booking_status = 'CONFIRMED'
+                OR (
+                    b.booking_status = 'PENDING'
+                    AND b.reservation_expires_at > NOW()
+                )
             )
 
             AND b.check_in < $2

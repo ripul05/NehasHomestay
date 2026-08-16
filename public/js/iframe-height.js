@@ -1,6 +1,7 @@
 (() => {
     const BOOKING_HEIGHT_TYPE = "BOOKING_HEIGHT";
     const MIN_HEIGHT = 700;
+    const parentOrigin = document.referrer ? new URL(document.referrer).origin : null;
 
     let lastSentHeight = null;
     let rafId = null;
@@ -33,10 +34,13 @@
         lastSentHeight = nextHeight;
 
         console.log("Sending height:", nextHeight);
+        if (!parentOrigin || window.parent === window) return;
+
+        console.log("Sending height:", nextHeight);
         window.parent.postMessage({
             type: BOOKING_HEIGHT_TYPE,
             height: nextHeight
-        }, "*");
+        }, parentOrigin);
     }
 
     function scheduleHeightUpdate() {

@@ -16,7 +16,8 @@ async function createBooking({
     children,
     checkIn,
     checkOut,
-    roomIds
+    roomIds,
+    bookingAccessTokenHash
 }) {
 
     const client = await db.connect();
@@ -99,9 +100,12 @@ async function createBooking({
 
             WHERE br.room_id = ANY($1::int[])
 
-            AND b.booking_status IN (
-                'PENDING',
-                'CONFIRMED'
+            AND (
+                b.booking_status = 'CONFIRMED'
+                OR (
+                    b.booking_status = 'PENDING'
+                    AND b.reservation_expires_at > NOW()
+                )
             )
 
             AND b.check_in < $3
@@ -335,7 +339,9 @@ async function createBooking({
                 check_out,
                 total_amount,
                 payment_status,
-                booking_status
+                booking_status,
+                reservation_expires_at,
+                booking_access_token_hash
             )
 
             VALUES (
@@ -349,7 +355,9 @@ async function createBooking({
                 $8,
                 $9,
                 'PENDING',
-                'PENDING'
+                'PENDING',
+                NOW() + INTERVAL '15 minutes',
+                $10
             )
 
             RETURNING *;
@@ -368,7 +376,8 @@ async function createBooking({
                     children,
                     checkIn,
                     checkOut,
-                    totalAmount
+                    totalAmount,
+                    bookingAccessTokenHash
                 ]
             );
 

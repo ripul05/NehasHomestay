@@ -60,9 +60,23 @@ CREATE TABLE bookings (
 
     transaction_id VARCHAR(150),
 
+    reservation_expires_at TIMESTAMPTZ,
+
+    booking_access_token_hash CHAR(64),
+
+    razorpay_order_id VARCHAR(255) UNIQUE,
+
+    razorpay_payment_id VARCHAR(255) UNIQUE,
+
+    razorpay_signature VARCHAR(255),
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
 );
+
+CREATE INDEX bookings_pending_expiry_idx
+    ON bookings (reservation_expires_at)
+    WHERE booking_status = 'PENDING';
 
 
 
