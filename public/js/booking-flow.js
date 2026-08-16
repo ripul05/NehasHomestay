@@ -58,11 +58,11 @@ let activePaymentAttemptId = 0;
      */
 
     const API_BASE_URL =
-        "https://nehas-homestay.vercel.app";
+        // "https://nehas-homestay.vercel.app";
 
     // Local development:
     // const API_BASE_URL =
-    //     "http://localhost:3000";
+        "http://localhost:3000";
 
 
     /*
@@ -662,12 +662,15 @@ let activePaymentAttemptId = 0;
                         return;
                     }
 
-                    confirmBookingButton.disabled = false;
-                    confirmBookingButton.textContent = "Confirm & Proceed to Payment";
+                    renderBookingConfirmationState({
+                        bookingData,
+                        guestName,
+                        email,
+                        phone
+                    });
 
-                    if (window.bookingWizard) {
-                        window.bookingWizard.showStep(1);
-                    }
+                    confirmBookingButton.disabled = true;
+                    confirmBookingButton.textContent = "Booking Confirmed";
 
                 } catch (error) {
                     console.error("Payment verification error:", error);
@@ -728,6 +731,83 @@ let activePaymentAttemptId = 0;
         });
 
         razorpay.open();
+    }
+
+    function renderBookingConfirmationState({ bookingData, guestName, email, phone }) {
+        const section = document.getElementById("guestDetailsSection");
+
+        if (!section) {
+            return;
+        }
+
+        const selection = window.bookingSelection || {};
+        const dates = selection.dates || {};
+        const guests = selection.guests || {};
+        const selectedRooms = selection.selectedRooms || [];
+
+        const guestSummary = [guestName, email, phone]
+            .filter(Boolean)
+            .join(" • ");
+
+        const roomSummary = selectedRooms.length
+            ? selectedRooms.map(room => `
+                <div class="booking-confirmation-room">
+                    <span>${escapeHtml(room.name || "Room")}</span>
+                    <strong>${formatCurrency(room.total || 0)}</strong>
+                </div>
+            `).join("")
+            : "<div class='booking-confirmation-room'><span>Room details</span></div>";
+
+        section.innerHTML = `
+            <div class="booking-confirmation-card">
+                <div class="booking-confirmation-header">
+                    <div class="booking-confirmation-badge">✓</div>
+                    <div>
+                        <p class="booking-confirmation-kicker">Booking confirmed</p>
+                        <h2>Your stay is reserved</h2>
+                    </div>
+                </div>
+
+                <div class="booking-confirmation-grid">
+                    <div class="booking-confirmation-panel">
+                        <h3>Confirmation</h3>
+                        <div class="confirmation-row">
+                            <span>Reference</span>
+                            <strong>${escapeHtml(bookingData?.booking?.bookingReference || "N/A")}</strong>
+                        </div>
+                        <div class="confirmation-row">
+                            <span>Guest</span>
+                            <strong>${escapeHtml(guestSummary || "Guest")}</strong>
+                        </div>
+                        <div class="confirmation-row">
+                            <span>Total paid</span>
+                            <strong>${formatCurrency(bookingData?.pricing?.totalAmount || selection?.pricing?.totalAmount || 0)}</strong>
+                        </div>
+                    </div>
+
+                    <div class="booking-confirmation-panel">
+                        <h3>Stay details</h3>
+                        <div class="confirmation-row">
+                            <span>Dates</span>
+                            <strong>${dates.checkIn ? formatDate(dates.checkIn) : "—"} → ${dates.checkOut ? formatDate(dates.checkOut) : "—"}</strong>
+                        </div>
+                        <div class="confirmation-row">
+                            <span>Guests</span>
+                            <strong>${guests.adults || 0} adults${(guests.children || 0) > 0 ? `, ${(guests.children || 0)} children` : ""}</strong>
+                        </div>
+                        <div class="confirmation-row">
+                            <span>Length</span>
+                            <strong>${dates.nights || 0} ${Number(dates.nights) === 1 ? "night" : "nights"}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="booking-confirmation-rooms">
+                    <h3>Selected rooms</h3>
+                    ${roomSummary}
+                </div>
+            </div>
+        `;
     }
 
     /*

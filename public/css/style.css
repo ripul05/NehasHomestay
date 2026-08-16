@@ -113,6 +113,52 @@
 #bookingRoot .review-total { align-items: center; margin-top: var(--nh-space-3); padding-top: var(--nh-space-3); border-top: 1px solid var(--nh-border); } #bookingRoot .review-total strong { font-size: 20px; }
 #bookingRoot #confirmBookingButton { width: 100%; margin: 0; position: static; }
 
+#bookingRoot .booking-confirmation-card {
+    padding: var(--nh-space-5);
+    border: 1px solid var(--nh-border);
+    border-radius: var(--nh-radius-lg);
+    background: linear-gradient(180deg, #fff 0%, #f8f4ed 100%);
+    box-shadow: var(--nh-shadow-sm);
+}
+#bookingRoot .booking-confirmation-header {
+    display: flex; align-items: center; gap: var(--nh-space-3);
+    margin-bottom: var(--nh-space-5);
+}
+#bookingRoot .booking-confirmation-badge {
+    display: grid; place-items: center; width: 52px; height: 52px;
+    border-radius: 50%; background: #eaf7ee; color: #1f7a46; font-size: 26px; font-weight: 800;
+}
+#bookingRoot .booking-confirmation-kicker {
+    margin: 0 0 4px; color: var(--nh-accent-strong); text-transform: uppercase; letter-spacing: .08em; font-size: 12px; font-weight: 700;
+}
+#bookingRoot .booking-confirmation-header h2 {
+    margin: 0; font-size: clamp(28px, 3vw, 36px); line-height: 1.15; letter-spacing: -.03em;
+}
+#bookingRoot .booking-confirmation-grid {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--nh-space-4);
+    margin-bottom: var(--nh-space-5);
+}
+#bookingRoot .booking-confirmation-panel,
+#bookingRoot .booking-confirmation-rooms {
+    padding: var(--nh-space-4); border: 1px solid var(--nh-border); border-radius: var(--nh-radius-md); background: rgba(255,255,255,.75);
+}
+#bookingRoot .booking-confirmation-panel h3,
+#bookingRoot .booking-confirmation-rooms h3 {
+    margin: 0 0 var(--nh-space-3); font-size: 18px;
+}
+#bookingRoot .confirmation-row {
+    display: flex; justify-content: space-between; gap: var(--nh-space-3); padding: 8px 0; color: var(--nh-muted); border-bottom: 1px solid rgba(125,104,78,.12);
+}
+#bookingRoot .confirmation-row:last-child { border-bottom: 0; }
+#bookingRoot .confirmation-row strong { color: var(--nh-ink); font-size: 14px; text-align: right; }
+#bookingRoot .booking-confirmation-rooms { margin-top: 0; }
+#bookingRoot .booking-confirmation-room {
+    display: flex; justify-content: space-between; align-items: center; gap: var(--nh-space-3); padding: 10px 0; border-bottom: 1px solid rgba(125,104,78,.12);
+    color: var(--nh-muted);
+}
+#bookingRoot .booking-confirmation-room:last-child { border-bottom: 0; }
+#bookingRoot .booking-confirmation-room strong { color: var(--nh-ink); }
+
 #bookingRoot .booking-icon,
 #bookingRoot #selectedDates {
     pointer-events: none;
