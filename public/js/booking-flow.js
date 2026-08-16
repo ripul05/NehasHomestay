@@ -876,7 +876,7 @@ let paymentCompleted = false;
                      * Show success
                      */
 
-                    showSwal({
+                    await Promise.resolve(showSwal({
 
                         icon: "success",
 
@@ -887,7 +887,21 @@ let paymentCompleted = false;
                             `Your booking ${bookingData.booking.bookingReference
                             } has been confirmed.`
 
-                    });
+                    }));
+
+                    /*
+                     * The payment is complete, so return the customer to
+                     * the first screen after they dismiss the confirmation.
+                     * This also removes the completed guest-details form
+                     * from view before a new booking begins.
+                     */
+                    confirmBookingButton.disabled = false;
+                    confirmBookingButton.textContent =
+                        "Confirm & Proceed to Payment";
+
+                    if (window.bookingWizard) {
+                        window.bookingWizard.showStep(1);
+                    }
 
 
                 }
