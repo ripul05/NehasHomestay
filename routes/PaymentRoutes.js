@@ -10,7 +10,12 @@ const router =
 
 
 const paymentRepository =
-    require("../Database/PaymentRepo");
+    require("../database/PaymentRepo");
+const { createRateLimiter } = require("../middleware/rateLimit");
+
+function hashAccessToken(accessToken) {
+    return crypto.createHash("sha256").update(accessToken).digest("hex");
+}
 
 
 /*
@@ -42,12 +47,18 @@ const razorpay =
 
 router.post(
     "/payments/create-order",
+    createRateLimiter({
+        windowMs: 15 * 60 * 1000,
+        max: 10,
+        message: "Too many payment order attempts. Please try again later."
+    }),
     async (req, res) => {
 
         try {
 
             const {
-                bookingId
+                bookingId,
+                bookingAccessToken
             } = req.body;
 
 
@@ -77,6 +88,13 @@ router.post(
 
             }
 
+            if (typeof bookingAccessToken !== "string" || bookingAccessToken.length < 32) {
+                return res.status(403).json({ success: false, error: "Invalid booking access token." });
+            }
+
+            await paymentRepository.expirePendingBookings();
+            const accessTokenHash = hashAccessToken(bookingAccessToken);
+
 
             /*
              * Get booking from database
@@ -85,7 +103,8 @@ router.post(
             const booking =
                 await paymentRepository
                     .getBookingForPayment(
-                        numericBookingId
+                        numericBookingId,
+                        accessTokenHash
                     );
 
 
@@ -96,7 +115,7 @@ router.post(
                     success: false,
 
                     error:
-                        "Booking not found."
+                        "Booking not found or access is not authorized."
 
                 });
 
@@ -143,6 +162,13 @@ router.post(
 
                 });
 
+            }
+
+            if (booking.booking_status !== "PENDING") {
+                return res.status(400).json({
+                    success: false,
+                    error: "This booking reservation has expired."
+                });
             }
 
 
@@ -257,11 +283,34 @@ router.post(
              * Save Razorpay order ID
              */
 
-            await paymentRepository
+            const savedOrder = await paymentRepository
                 .saveRazorpayOrderId(
                     booking.id,
                     razorpayOrder.id
                 );
+
+            /* A parallel request persisted its order first; never return ours. */
+            if (!savedOrder) {
+                const currentBooking = await paymentRepository.getBookingForPayment(
+                    numericBookingId,
+                    accessTokenHash
+                );
+
+                if (!currentBooking || !currentBooking.razorpay_order_id) {
+                    throw new Error("Unable to persist Razorpay order.");
+                }
+
+                return res.json({
+                    success: true,
+                    existingOrder: true,
+                    bookingId: currentBooking.id,
+                    bookingReference: currentBooking.booking_reference,
+                    razorpayOrderId: currentBooking.razorpay_order_id,
+                    amount,
+                    currency: "INR",
+                    keyId: process.env.RAZORPAY_KEY_ID
+                });
+            }
 
 
             /*
@@ -331,6 +380,11 @@ router.post(
 
 router.post(
     "/payments/verify",
+    createRateLimiter({
+        windowMs: 15 * 60 * 1000,
+        max: 12,
+        message: "Too many payment verification attempts. Please try again later."
+    }),
     async (req, res) => {
 
         try {
@@ -338,6 +392,8 @@ router.post(
             const {
 
                 bookingId,
+
+                bookingAccessToken,
 
                 razorpay_payment_id,
 
@@ -376,6 +432,13 @@ router.post(
 
             }
 
+            if (typeof bookingAccessToken !== "string" || bookingAccessToken.length < 32) {
+                return res.status(403).json({ success: false, error: "Invalid booking access token." });
+            }
+
+            await paymentRepository.expirePendingBookings();
+            const accessTokenHash = hashAccessToken(bookingAccessToken);
+
 
             if (
                 !razorpay_payment_id ||
@@ -404,7 +467,8 @@ router.post(
             const booking =
                 await paymentRepository
                     .getBookingForPayment(
-                        numericBookingId
+                        numericBookingId,
+                        accessTokenHash
                     );
 
 
@@ -415,7 +479,7 @@ router.post(
                     success: false,
 
                     error:
-                        "Booking not found."
+                        "Booking not found or access is not authorized."
 
                 });
 
@@ -654,6 +718,13 @@ router.post(
 
                     });
 
+            if (!updatedBooking) {
+                return res.status(409).json({
+                    success: false,
+                    error: "This booking reservation has expired or was already processed."
+                });
+            }
+
 
             /*
              * ==================================
@@ -726,6 +797,58 @@ router.post(
 
     }
 );
+
+// /* Razorpay is the server-to-server reconciliation path when a browser closes. */
+// router.post("/payments/webhook", async (req, res) => {
+//     try {
+//         const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+//         const signature = req.get("x-razorpay-signature");
+//         const rawBody = req.rawBody;
+
+//         if (!webhookSecret || !signature || !rawBody) {
+//             return res.status(400).json({ success: false, error: "Invalid webhook request." });
+//         }
+
+//         const expected = crypto
+//             .createHmac("sha256", webhookSecret)
+//             .update(rawBody)
+//             .digest("hex");
+
+//         const expectedBuffer = Buffer.from(expected, "utf8");
+//         const receivedBuffer = Buffer.from(signature, "utf8");
+//         if (
+//             expectedBuffer.length !== receivedBuffer.length ||
+//             !crypto.timingSafeEqual(expectedBuffer, receivedBuffer)
+//         ) {
+//             return res.status(400).json({ success: false, error: "Invalid webhook signature." });
+//         }
+
+//         if (req.body?.event !== "payment.captured") {
+//             return res.status(200).json({ success: true, ignored: true });
+//         }
+
+//         const payment = req.body?.payload?.payment?.entity;
+//         if (!payment?.order_id || !payment?.id) {
+//             return res.status(400).json({ success: false, error: "Webhook payment details are incomplete." });
+//         }
+
+//         const booking = await paymentRepository.getBookingByRazorpayOrderId(payment.order_id);
+//         if (!booking) {
+//             return res.status(200).json({ success: true, ignored: true });
+//         }
+
+//         await paymentRepository.markPaymentCapturedFromWebhook({
+//             razorpayOrderId: payment.order_id,
+//             razorpayPaymentId: payment.id
+//         });
+
+//         return res.status(200).json({ success: true });
+//     }
+//     catch (error) {
+//         console.error("Razorpay webhook error:", error);
+//         return res.status(500).json({ success: false, error: "Unable to process webhook." });
+//     }
+// });
 
 
 module.exports = router;

@@ -40,8 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
      */
 
     const API_BASE_URL =
-        "https://nehas-homestay.vercel.app";
-        // "http://localhost:3000";
+        // "https://nehas-homestay.vercel.app";
+        "http://localhost:3000";
 
     const showSwal = (options) => {
         if (window.Swal) {
@@ -880,7 +880,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             showSwal({
                 icon: "error",
-                title: "Validation failed",
+                title: "Booking Could Not Be Completed",
                 text: error.message || "Unable to validate selection."
             });
 

@@ -1,9 +1,12 @@
 const express = require("express");
+const crypto = require("crypto");
 
 const router = express.Router();
 
 const bookingRepository =
-    require("../Database/BookingRepo");
+    require("../database/BookingRepo");
+const { createRateLimiter } = require("../middleware/rateLimit");
+const { validateStayDates, validateGuestDetails } = require("../utils/bookingValidation");
 
 
 /**
@@ -11,7 +14,11 @@ const bookingRepository =
  *
  * POST /api/bookings
  */
-router.post("/bookings", async (req, res) => {
+router.post("/bookings", createRateLimiter({
+    windowMs: 15 * 60 * 1000,
+    max: 8,
+    message: "Too many booking attempts. Please try again later."
+}), async (req, res) => {
 
     try {
 
@@ -33,42 +40,15 @@ router.post("/bookings", async (req, res) => {
          * --------------------------------
          */
 
-        if (!guestName) {
+        const guestDetails = validateGuestDetails({ guestName, email, phone });
+
+        if (guestDetails.error) {
 
             return res.status(400).json({
 
                 success: false,
 
-                error:
-                    "Guest name is required."
-
-            });
-
-        }
-
-
-        if (!email) {
-
-            return res.status(400).json({
-
-                success: false,
-
-                error:
-                    "Email is required."
-
-            });
-
-        }
-
-
-        if (!phone) {
-
-            return res.status(400).json({
-
-                success: false,
-
-                error:
-                    "Phone number is required."
+                error: guestDetails.error
 
             });
 
@@ -81,52 +61,15 @@ router.post("/bookings", async (req, res) => {
          * --------------------------------
          */
 
-        if (!checkIn || !checkOut) {
+        const stay = validateStayDates(checkIn, checkOut);
+
+        if (stay.error) {
 
             return res.status(400).json({
 
                 success: false,
 
-                error:
-                    "Check-in and check-out dates are required."
-
-            });
-
-        }
-
-
-        const start =
-            new Date(checkIn);
-
-        const end =
-            new Date(checkOut);
-
-
-        if (
-            Number.isNaN(start.getTime()) ||
-            Number.isNaN(end.getTime())
-        ) {
-
-            return res.status(400).json({
-
-                success: false,
-
-                error:
-                    "Invalid date format."
-
-            });
-
-        }
-
-
-        if (start >= end) {
-
-            return res.status(400).json({
-
-                success: false,
-
-                error:
-                    "Check-out must be after check-in."
+                error: stay.error
 
             });
 
@@ -255,9 +198,12 @@ router.post("/bookings", async (req, res) => {
          */
 
         const bookingReference =
-            `NHS-${Date.now()}-${Math.floor(
-                Math.random() * 1000
-            )}`;
+            `NHS-${crypto.randomBytes(9).toString("hex").toUpperCase()}`;
+        const bookingAccessToken = crypto.randomBytes(32).toString("base64url");
+        const bookingAccessTokenHash = crypto
+            .createHash("sha256")
+            .update(bookingAccessToken)
+            .digest("hex");
 
 
         /*
@@ -271,11 +217,11 @@ router.post("/bookings", async (req, res) => {
 
                 bookingReference,
 
-                guestName,
+                guestName: guestDetails.guestName,
 
-                email,
+                email: guestDetails.email,
 
-                phone,
+                phone: guestDetails.phone,
 
                 adults:
                     adultCount,
@@ -288,7 +234,9 @@ router.post("/bookings", async (req, res) => {
                 checkOut,
 
                 roomIds:
-                    uniqueRoomIds
+                    uniqueRoomIds,
+
+                bookingAccessTokenHash
 
             });
 
@@ -310,6 +258,8 @@ router.post("/bookings", async (req, res) => {
 
                 bookingReference:
                     result.booking.booking_reference,
+
+                accessToken: bookingAccessToken,
 
                 guestName:
                     result.booking.guest_name,

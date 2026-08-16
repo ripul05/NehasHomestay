@@ -1,5 +1,6 @@
 let lastHeight = 0;
 let frameId = null;
+const parentOrigin = document.referrer ? new URL(document.referrer).origin : null;
 
 function getVisibleContentHeight() {
     const container = document.querySelector(".booking-page") || document.querySelector("main") || document.body;
@@ -20,10 +21,12 @@ function sendHeight() {
 
     lastHeight = height;
 
+    if (!parentOrigin || window.parent === window) return;
+
     window.parent.postMessage({
         type: "booking-height",
         height
-    }, "*");
+    }, parentOrigin);
 }
 
 function scheduleHeightUpdate() {
