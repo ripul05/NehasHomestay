@@ -8,6 +8,7 @@
     width: 100%; max-width: 100%; margin: 0; padding: var(--nh-space-4) 16px;
     overflow: visible; background: var(--nh-background); color: var(--nh-ink);
     font-family: var(--nh-font); font-size: 16px; line-height: 1.5;
+    container-type: inline-size;
 }
 #bookingRoot * { font-family: inherit; }
 #bookingRoot button, #bookingRoot input { font: inherit; }
@@ -101,17 +102,133 @@
 #bookingRoot .selection-summary { margin-top: var(--nh-space-5); padding: var(--nh-space-4); border: 1px solid #e7dfd2; border-radius: var(--nh-radius-md); background: var(--nh-accent-soft); }
 #bookingRoot .selection-summary-row { display: flex; justify-content: space-between; padding: 7px 0; color: var(--nh-muted); } #bookingRoot .selection-summary-row strong { color: var(--nh-ink); } #bookingRoot #continueBooking { width: 100%; margin-top: var(--nh-space-3); }
 
-#bookingRoot #guestDetailsForm { display: grid; grid-template-columns: minmax(0,1.15fr) minmax(260px,.85fr); gap: var(--nh-space-4) var(--nh-space-5); width: 100%; height: auto; overflow: visible; align-items: start; }
-#bookingRoot #guestDetailsForm .form-row { grid-column: 1; display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--nh-space-3); }
-#bookingRoot #guestDetailsForm > .form-group { grid-column: 1; } #bookingRoot #guestDetailsForm .booking-review, #bookingRoot #guestDetailsForm #confirmBookingButton { grid-column: 2; }
-#bookingRoot .form-group { margin: 0; } #bookingRoot .form-group label { display: block; margin-bottom: 7px; font-size: 14px; font-weight: 650; }
-#bookingRoot .form-group input { width: 100%; min-height: 48px; padding: 12px 14px; border: 1px solid var(--nh-border); border-radius: var(--nh-radius-sm); outline: 0; background: var(--nh-surface-soft); color: var(--nh-ink); }
-#bookingRoot .form-group input:focus { border-color: var(--nh-accent); background: #fff; box-shadow: 0 0 0 4px rgba(139,106,61,.13); }
-#bookingRoot .booking-review { margin: 0; padding: var(--nh-space-4); border-radius: var(--nh-radius-md); background: var(--nh-surface-soft); border: 1px solid var(--nh-border); }
-#bookingRoot .booking-review h3 { margin: 0 0 var(--nh-space-3); font-size: 18px; } #bookingRoot .review-row, #bookingRoot .review-room { padding: 7px 0; color: var(--nh-muted); font-size: 14px; }
-#bookingRoot .review-rooms { margin-top: var(--nh-space-2); padding-top: var(--nh-space-2); border-top: 1px solid var(--nh-border); } #bookingRoot .review-room, #bookingRoot .review-total { display: flex; justify-content: space-between; gap: var(--nh-space-3); }
-#bookingRoot .review-total { align-items: center; margin-top: var(--nh-space-3); padding-top: var(--nh-space-3); border-top: 1px solid var(--nh-border); } #bookingRoot .review-total strong { font-size: 20px; }
-#bookingRoot #confirmBookingButton { width: 100%; margin: 0; position: static; }
+#bookingRoot #guestDetailsForm {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+    gap: var(--nh-space-4) var(--nh-space-5);
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    overflow: visible;
+    align-items: start;
+    min-width: 0;
+}
+#bookingRoot #guestDetailsForm .form-row {
+    grid-column: 1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--nh-space-3);
+    min-width: 0;
+}
+#bookingRoot #guestDetailsForm > .form-group { grid-column: 1; min-width: 0; }
+#bookingRoot #guestDetailsForm .booking-review, #bookingRoot #guestDetailsForm #confirmBookingButton { grid-column: 2; min-width: 0; }
+#bookingRoot .form-group {
+    margin: 0;
+    min-width: 0;
+    width: 100%;
+}
+#bookingRoot .form-group label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 14px;
+    font-weight: 650;
+}
+#bookingRoot .form-group input {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid var(--nh-border);
+    border-radius: var(--nh-radius-sm);
+    outline: 0;
+    background: var(--nh-surface-soft);
+    color: var(--nh-ink);
+}
+#bookingRoot .form-group input:focus {
+    border-color: var(--nh-accent);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(139,106,61,.13);
+}
+#bookingRoot .booking-review {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: var(--nh-space-4);
+    border-radius: var(--nh-radius-md);
+    background: var(--nh-surface-soft);
+    border: 1px solid var(--nh-border);
+    overflow-wrap: anywhere;
+}
+#bookingRoot .booking-review h3 { margin: 0 0 var(--nh-space-3); font-size: 18px; }
+#bookingRoot .review-row, #bookingRoot .review-room {
+    padding: 7px 0;
+    color: var(--nh-muted);
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+#bookingRoot .review-rooms {
+    margin-top: var(--nh-space-2);
+    padding-top: var(--nh-space-2);
+    border-top: 1px solid var(--nh-border);
+}
+#bookingRoot .review-room, #bookingRoot .review-total {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--nh-space-3);
+    min-width: 0;
+}
+#bookingRoot .review-total {
+    align-items: center;
+    margin-top: var(--nh-space-3);
+    padding-top: var(--nh-space-3);
+    border-top: 1px solid var(--nh-border);
+}
+#bookingRoot .review-total strong { font-size: 20px; }
+#bookingRoot #confirmBookingButton {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0;
+    position: static;
+}
+
+@container (max-width: 840px) {
+    #bookingRoot #guestDetailsForm {
+        grid-template-columns: 1fr;
+    }
+
+    #bookingRoot #guestDetailsForm .form-row,
+    #bookingRoot #guestDetailsForm > .form-group,
+    #bookingRoot #guestDetailsForm .booking-review,
+    #bookingRoot #guestDetailsForm #confirmBookingButton {
+        grid-column: 1;
+    }
+
+    #bookingRoot #guestDetailsForm .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@container (max-width: 560px) {
+    #bookingRoot .guest-details-card {
+        padding: var(--nh-space-4);
+    }
+
+    #bookingRoot #guestDetailsForm {
+        gap: var(--nh-space-3);
+    }
+
+    #bookingRoot #guestDetailsForm .form-row {
+        gap: var(--nh-space-2);
+    }
+
+    #bookingRoot .booking-review {
+        padding: var(--nh-space-3);
+    }
+}
 
 #bookingRoot .booking-confirmation-card {
     padding: var(--nh-space-5);
