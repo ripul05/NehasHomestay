@@ -116,12 +116,13 @@
 #bookingRoot #guestDetailsForm .form-row {
     grid-column: 1;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: var(--nh-space-3);
     min-width: 0;
+    width: 100%;
 }
-#bookingRoot #guestDetailsForm > .form-group { grid-column: 1; min-width: 0; }
-#bookingRoot #guestDetailsForm .booking-review, #bookingRoot #guestDetailsForm #confirmBookingButton { grid-column: 2; min-width: 0; }
+#bookingRoot #guestDetailsForm > .form-group { grid-column: 1; min-width: 0; width: 100%; }
+#bookingRoot #guestDetailsForm .booking-review, #bookingRoot #guestDetailsForm #confirmBookingButton { grid-column: 2; min-width: 0; width: 100%; }
 #bookingRoot .form-group {
     margin: 0;
     min-width: 0;
@@ -132,6 +133,7 @@
     margin-bottom: 7px;
     font-size: 14px;
     font-weight: 650;
+    white-space: nowrap;
 }
 #bookingRoot .form-group input {
     width: 100%;
@@ -145,6 +147,15 @@
     outline: 0;
     background: var(--nh-surface-soft);
     color: var(--nh-ink);
+}
+#bookingRoot #guestName,
+#bookingRoot #guestPhone,
+#bookingRoot #guestEmail {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 #bookingRoot .form-group input:focus {
     border-color: var(--nh-accent);
@@ -195,7 +206,7 @@
     position: static;
 }
 
-@container (max-width: 840px) {
+@container (max-width: 760px) {
     #bookingRoot #guestDetailsForm {
         grid-template-columns: 1fr;
     }
