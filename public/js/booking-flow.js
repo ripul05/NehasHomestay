@@ -58,11 +58,11 @@ let activePaymentAttemptId = 0;
      */
 
     const API_BASE_URL =
-        // "https://nehas-homestay.vercel.app";
+        "https://nehas-homestay.vercel.app";
 
     // Local development:
     // const API_BASE_URL =
-        "http://localhost:3000";
+        // "http://localhost:3000";
 
 
     /*
