@@ -20,11 +20,29 @@ app.use((req, res, next) => {
   res.setHeader(
     "Content-Security-Policy",
     "default-src 'self'; " +
-    "script-src 'self' https://cdn.jsdelivr.net https://checkout.razorpay.com https://cdn.razorpay.com; " +
-    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+
+    "script-src 'self' " +
+    "https://cdn.jsdelivr.net " +
+    "https://checkout.razorpay.com " +
+    "https://cdn.razorpay.com; " +
+
+    "style-src 'self' " +
+    "'unsafe-inline' " +
+    "https://cdn.jsdelivr.net; " +
+
     "img-src 'self' data: https:; " +
-    "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://nehas-homestay.vercel.app; " +
-    "frame-src https://api.razorpay.com https://checkout.razorpay.com; " +
+
+    "connect-src 'self' " +
+    "https://api.razorpay.com " +
+    "https://lumberjack.razorpay.com " +
+    "https://nehas-homestay.vercel.app " +
+    "https://nehas-homestay-git-main-ripuls-projects.vercel.app " +
+    "https://nehas-homestay-nxwlhndpd-ripuls-projects.vercel.app; " +
+
+    "frame-src " +
+    "https://api.razorpay.com " +
+    "https://checkout.razorpay.com; " +
+
     "base-uri 'self'; " +
     "form-action 'self'"
   );
