@@ -22,8 +22,8 @@ app.use((req, res, next) => {
     "default-src 'self'; " +
     "script-src 'self' https://cdn.jsdelivr.net https://checkout.razorpay.com https://cdn.razorpay.com; " +
     "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
-    "img-src 'self' data:; " +
-    "connect-src 'self' https://api.razorpay.com https://nehas-homestay.vercel.app; " +
+    "img-src 'self' data: https:; " +
+    "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://nehas-homestay.vercel.app; " +
     "frame-src https://api.razorpay.com https://checkout.razorpay.com; " +
     "base-uri 'self'; " +
     "form-action 'self'"
