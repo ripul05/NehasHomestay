@@ -30,21 +30,166 @@
             <div class="booking-side-image"></div>
             <div class="booking-side-content">
                 <h2 class="booking-side-title">Stay With Us</h2>
-                <p class="booking-side-text">A quiet place to rest, work, and meet fellow travelers in the heart of the Mysore.</p>
+                <p class="booking-side-text">A quiet place to rest, work, and meet fellow travelers in the heart of the Mysore.
+                </p>
                 <ul class="booking-side-amenities">
                     <li>📍 Heart of Mysore</li>
                     <li>📶 Free Wi-Fi</li>
                     <li>🚗 Free Self Parking</li>
                     <li>❤️ Personalized Hospitality</li>
                 </ul>
-                <div class="booking-side-quote">
-                    “Best hostel we stayed at on the whole trip.” — Recent Guest
+        
+                <div class="booking-side-policy">
+        
+                    <h3>Cancellation Policy</h3>
+        
+                    <ul>
+        
+                        <li>
+                            <strong>1-day bookings:</strong>
+                            Cancellation must be made at least
+                            <strong>7 days prior</strong> to the booking date.
+                        </li>
+        
+                        <li>
+                            <strong>Bookings of 7 days:</strong>
+                            Cancellation requires at least
+                            <strong>15 days’ prior notice</strong>.
+                        </li>
+        
+                        <li>
+                            <strong>Bookings of 1 month or longer:</strong>
+                            Cancellation requires at least
+                            <strong>1 month’s prior notice</strong> and will be
+                            <strong>non-refundable</strong>.
+                        </li>
+        
+                        <li>
+                            <strong>Late cancellations:</strong>
+                            Cancellations made without the required notice period
+                            will be <strong>non-refundable</strong>.
+                        </li>
+        
+                    </ul>
+        
+        
+                    <div class="booking-side-contact">
+        
+                        <strong>Need to cancel or reschedule?</strong>
+        
+                        <p>
+                            Please reach out to us or call us at
+                            <a href="tel:9606969920">9606969920</a>.
+                        </p>
+        
+                    </div>
+        
                 </div>
             </div>
         </aside>
 
         <div class="booking-content">
-
+        
+            <!-- Mobile Cancellation Policy Trigger -->
+        
+            <button type="button" class="mobile-policy-trigger" id="mobilePolicyTrigger">
+        
+                <span class="mobile-policy-trigger-left">
+        
+                    <span class="mobile-policy-icon">
+                        📋
+                    </span>
+        
+                    <span>
+                        Cancellation Policy
+                    </span>
+        
+                </span>
+        
+                <span class="mobile-policy-arrow">
+                    ›
+                </span>
+        
+            </button>
+        
+        
+            <!-- Mobile Cancellation Policy Modal -->
+        
+            <div class="mobile-policy-overlay" id="mobilePolicyOverlay" aria-hidden="true">
+        
+                <div class="mobile-policy-modal" role="dialog" aria-modal="true" aria-labelledby="mobilePolicyTitle">
+        
+                    <button type="button" class="mobile-policy-close" id="mobilePolicyClose"
+                        aria-label="Close cancellation policy">
+        
+                        ×
+        
+                    </button>
+        
+        
+                    <h2 id="mobilePolicyTitle">
+                        Cancellation Policy
+                    </h2>
+        
+        
+                    <ul>
+        
+                        <li>
+                            <strong>1-day bookings:</strong>
+                            Cancellation must be made at least
+                            <strong>7 days prior</strong> to the booking date.
+                        </li>
+        
+                        <li>
+                            <strong>Bookings of 7 days:</strong>
+                            Cancellation requires at least
+                            <strong>15 days’ prior notice</strong>.
+                        </li>
+        
+                        <li>
+                            <strong>Bookings of 1 month or longer:</strong>
+                            Cancellation requires at least
+                            <strong>1 month’s prior notice</strong>
+                            and will be
+                            <strong>non-refundable</strong>.
+                        </li>
+        
+                        <li>
+                            <strong>Late cancellations:</strong>
+                            Cancellations made without the required notice period
+                            will be
+                            <strong>non-refundable</strong>.
+                        </li>
+        
+                    </ul>
+        
+        
+                    <div class="mobile-policy-contact">
+        
+                        <strong>
+                            Need to cancel or reschedule?
+                        </strong>
+        
+                        <p>
+                            Please reach out to us or call us at
+                            <a href="tel:9606969920">
+                                9606969920
+                            </a>.
+                        </p>
+        
+                    </div>
+        
+        
+                    <button type="button" class="mobile-policy-done" id="mobilePolicyDone">
+        
+                        Close
+        
+                    </button>
+        
+                </div>
+        
+            </div>
+        
             <section class="booking-card step step-1 active">
                 <h1 class="booking-title">Book Your Stay</h1>
                 <p class="booking-subtitle">Select your dates and check room availability.</p>
@@ -97,12 +242,12 @@
                             </div>
                         </div>
                         <div class="highlight-item">
-                            <span class="highlight-icon">✅</span>
                             <div>
-                                <strong>Free Cancellation</strong>
-                                <p>Cancel up to 24 hours before check-in.</p>
+                                <strong>❤️ Personalised Hospitality</strong>
+                                <p> A warm, welcoming stay with personal attention
+                                    to make you feel right at home.</p>
                             </div>
-                        </div>
+                            </div>
                     </div>
 
                     <div class="booking-summary">
@@ -211,6 +356,7 @@
     <script src="js/guests.js"></script>
     <script src="js/availability.js"></script>
     <script src="js/booking-flow.js"></script>
+    <script src="js/mobilePolicy.js"></script>
     <script src="js/wizard.js"></script>
     <!-- <script src="js/iframe-height.js"></script> -->
 
