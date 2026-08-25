@@ -53,7 +53,12 @@
 #bookingRoot .booking-title { margin: 0 0 var(--nh-space-2); font-size: clamp(30px, 4vw, 42px); line-height: 1.1; letter-spacing: -.035em; }
 #bookingRoot .booking-subtitle { max-width: 520px; margin: 0 0 var(--nh-space-5); color: var(--nh-muted); font-size: 17px; }
 #bookingRoot .booking-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--nh-space-4); }
-#bookingRoot .booking-field { display: flex; flex-direction: column; }
+#bookingRoot .booking-field {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    min-width: 0;
+}
 #bookingRoot .booking-field label { margin-bottom: var(--nh-space-2); color: var(--nh-ink); font-size: 14px; font-weight: 650; }
 #bookingRoot .full-width, #bookingRoot .booking-summary, #bookingRoot #checkAvailability { grid-column: 1 / -1; }
 
@@ -61,6 +66,19 @@
     display: flex; align-items: center; min-height: 72px; gap: 14px; padding: 14px 18px;
     border: 1px solid var(--nh-border); border-radius: var(--nh-radius-md); background: var(--nh-surface-soft);
     color: var(--nh-ink); cursor: pointer; transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+#bookingRoot .booking-field .litepicker {
+    position: absolute !important;
+    top: calc(100% + 10px) !important;
+    left: 0 !important;
+    right: auto !important;
+    width: min(100%, 680px) !important;
+    max-width: calc(100vw - 32px) !important;
+    min-width: 0 !important;
+    z-index: 40;
+    box-shadow: var(--nh-shadow-md);
+    border-radius: var(--nh-radius-md);
+    overflow: hidden;
 }
 #bookingRoot .booking-input:hover, #bookingRoot .booking-input:focus-within { border-color: var(--nh-accent); background: #fff; box-shadow: 0 0 0 4px rgba(139,106,61,.13); }
 #bookingRoot .booking-icon { display: grid; width: 38px; height: 38px; place-items: center; border-radius: var(--nh-radius-sm); background: var(--nh-accent-soft); font-size: 19px; }
@@ -300,10 +318,24 @@
     #bookingRoot #guestDetailsForm .form-row, #bookingRoot #guestDetailsForm > .form-group, #bookingRoot #guestDetailsForm .booking-review, #bookingRoot #guestDetailsForm #confirmBookingButton { grid-column: 1; }
 }
 @media (max-width: 600px) {
-    #bookingRoot { padding: 12px; } #bookingRoot .booking-app { border-radius: var(--nh-radius-md); }
+    #bookingRoot { padding: 12px; }
+    #bookingRoot .booking-app { border-radius: var(--nh-radius-md); }
     #bookingRoot .booking-card, #bookingRoot .availability-card, #bookingRoot .guest-details-card { padding: var(--nh-space-4); border-radius: var(--nh-radius-md); }
     #bookingRoot .booking-form, #bookingRoot .booking-highlights, #bookingRoot #guestDetailsForm .form-row { grid-template-columns: 1fr; }
     #bookingRoot .room-selection-card { align-items: flex-start; flex-direction: column; } #bookingRoot .room-select-button { width: 100%; }
+    #bookingRoot .booking-field .litepicker {
+        position: fixed !important;
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: calc(100vw - 24px) !important;
+        max-width: 360px !important;
+        min-width: 0 !important;
+        max-height: 90vh !important;
+        z-index: 9999 !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+    }
 }
 
 /* =========================================

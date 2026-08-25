@@ -2,6 +2,10 @@ const hiddenCheckIn = document.getElementById("checkIn");
 const hiddenCheckOut = document.getElementById("checkOut");
 const selectedDates = document.getElementById("selectedDates");
 const totalNights = document.getElementById("totalNights");
+const datePickerTrigger = document.getElementById("datePickerButton");
+
+let litepickerInstance = null;
+let lastMobileLayout = null;
 
 const normalizeDate = (value) => {
     if (!value) {
@@ -32,12 +36,16 @@ const formatDateLabel = (date) => new Intl.DateTimeFormat("en", {
     year: "numeric"
 }).format(date);
 
-if (hiddenCheckIn && hiddenCheckOut && selectedDates && totalNights) {
-    new Litepicker({
-        element: document.getElementById("datePickerButton"),
+const isMobileCalendar = () => window.innerWidth <= 600;
+
+const buildPickerConfig = () => {
+    const mobile = isMobileCalendar();
+
+    return {
+        element: datePickerTrigger,
         singleMode: false,
-        numberOfMonths: 2,
-        numberOfColumns: 2,
+        numberOfMonths: mobile ? 1 : 2,
+        numberOfColumns: mobile ? 1 : 2,
         autoApply: true,
         format: "DD MMM YYYY",
         minDate: new Date(),
@@ -62,6 +70,49 @@ if (hiddenCheckIn && hiddenCheckOut && selectedDates && totalNights) {
                 const nights = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
                 totalNights.textContent = `${nights} ${nights === 1 ? "Night" : "Nights"}`;
             });
+        }
+    };
+};
+
+const destroyLitepicker = () => {
+    if (!litepickerInstance) {
+        return;
+    }
+
+    if (typeof litepickerInstance.destroy === "function") {
+        litepickerInstance.destroy();
+    }
+
+    litepickerInstance = null;
+};
+
+const initLitepicker = () => {
+    if (!hiddenCheckIn || !hiddenCheckOut || !selectedDates || !totalNights || !datePickerTrigger) {
+        return;
+    }
+
+    const mobile = isMobileCalendar();
+
+    if (lastMobileLayout !== null && lastMobileLayout !== mobile) {
+        destroyLitepicker();
+    }
+
+    if (litepickerInstance) {
+        return;
+    }
+
+    lastMobileLayout = mobile;
+    litepickerInstance = new Litepicker(buildPickerConfig());
+};
+
+if (hiddenCheckIn && hiddenCheckOut && selectedDates && totalNights && datePickerTrigger) {
+    initLitepicker();
+
+    window.addEventListener("resize", () => {
+        const currentMobileLayout = isMobileCalendar();
+
+        if (lastMobileLayout !== currentMobileLayout) {
+            initLitepicker();
         }
     });
 }
