@@ -1,13 +1,22 @@
 const db = require("./connection");
+const {
+    filterAvailableDormRooms,
+    collapseDormInventory
+} = require("./dormInventory");
 
 
 /**
- * Get all individual rooms/beds available
+ * Get all active rooms available
  * for the requested date range.
+ *
+ * The mixed dorm behaves like this:
+ * - if all 3 single beds are free, show the bundle AND the individual beds
+ * - if any single bed is taken, hide only the bundle option
+ * - other room types remain visible normally
  */
 async function getAvailableRooms(checkIn, checkOut) {
 
-    const query = `
+    const allRoomsQuery = `
         SELECT
             r.id,
             r.code,
@@ -22,61 +31,66 @@ async function getAvailableRooms(checkIn, checkOut) {
         FROM rooms r
 
         WHERE r.active = TRUE
-
-        /*
-         * Exclude units that have an overlapping
-         * pending or confirmed booking.
-         */
-        AND NOT EXISTS (
-
-            SELECT 1
-
-            FROM booking_rooms br
-
-            INNER JOIN bookings b
-                ON b.id = br.booking_id
-
-            WHERE br.room_id = r.id
-
-            AND (
-                b.booking_status = 'CONFIRMED'
-                OR (
-                    b.booking_status = 'PENDING'
-                    AND b.reservation_expires_at > NOW()
-                )
-            )
-
-            AND b.check_in < $2
-
-            AND b.check_out > $1
-        )
-
-        /*
-         * Exclude units that have been manually
-         * blocked for maintenance, owner use, etc.
-         */
-        AND NOT EXISTS (
-
-            SELECT 1
-
-            FROM blocked_dates bd
-
-            WHERE bd.room_id = r.id
-
-            AND bd.start_date < $2
-
-            AND bd.end_date > $1
-        )
-
         ORDER BY r.id;
     `;
 
-    const { rows } = await db.query(
-        query,
-        [checkIn, checkOut]
-    );
+    const { rows: allRooms } = await db.query(allRoomsQuery);
 
-    return rows;
+    const overlappingBookingQuery = `
+        SELECT DISTINCT
+            br.room_id
+
+        FROM booking_rooms br
+
+        INNER JOIN bookings b
+            ON b.id = br.booking_id
+
+        WHERE (
+            b.booking_status = 'CONFIRMED'
+            OR (
+                b.booking_status = 'PENDING'
+                AND b.reservation_expires_at > NOW()
+            )
+        )
+
+        AND b.check_in < $2
+        AND b.check_out > $1;
+    `;
+
+    const blockedDatesQuery = `
+        SELECT DISTINCT
+            bd.room_id
+
+        FROM blocked_dates bd
+
+        WHERE bd.start_date < $2
+        AND bd.end_date > $1;
+    `;
+
+    const [
+        overlappingBookings,
+        blockedDates
+    ] = await Promise.all([
+        db.query(overlappingBookingQuery, [checkIn, checkOut]),
+        db.query(blockedDatesQuery, [checkIn, checkOut])
+    ]);
+
+    const unavailableRoomIds = [
+        ...overlappingBookings.rows.map(row => Number(row.room_id)),
+        ...blockedDates.rows.map(row => Number(row.room_id))
+    ];
+
+    const filteredRooms = allRooms.filter(room => {
+        if (room.room_type !== "DORM") {
+            return !unavailableRoomIds.includes(Number(room.id));
+        }
+
+        return true;
+    });
+
+    return collapseDormInventory(
+        filterAvailableDormRooms(filteredRooms, unavailableRoomIds)
+    );
 }
 
 

@@ -1,4 +1,9 @@
 const db = require("./connection");
+const {
+    filterAvailableDormRooms,
+    collapseDormInventory,
+    expandDormSelectionIds
+} = require("./dormInventory");
 
 
 /**
@@ -11,7 +16,28 @@ async function getSelectedRooms(
     checkOut
 ) {
 
-    const query = `
+    const allRoomsQuery = `
+        SELECT
+            r.id,
+            r.code,
+            r.name,
+            r.room_type,
+            r.capacity,
+            r.max_adults,
+            r.max_children,
+            r.price_per_night,
+            r.active
+
+        FROM rooms r
+
+        WHERE r.active = TRUE
+        ORDER BY r.id;
+    `;
+
+    const { rows: allRooms } = await db.query(allRoomsQuery);
+    const expandedRoomIds = expandDormSelectionIds(roomIds, allRooms);
+
+    const selectedRoomsQuery = `
         SELECT
             r.id,
             r.code,
@@ -26,66 +52,78 @@ async function getSelectedRooms(
         FROM rooms r
 
         WHERE r.id = ANY($1::int[])
-
         AND r.active = TRUE
-
-        /*
-         * Make sure the room does not have an
-         * overlapping pending/confirmed booking.
-         */
-        AND NOT EXISTS (
-
-            SELECT 1
-
-            FROM booking_rooms br
-
-            INNER JOIN bookings b
-                ON b.id = br.booking_id
-
-            WHERE br.room_id = r.id
-
-            AND (
-                b.booking_status = 'CONFIRMED'
-                OR (
-                    b.booking_status = 'PENDING'
-                    AND b.reservation_expires_at > NOW()
-                )
-            )
-
-            AND b.check_in < $3
-
-            AND b.check_out > $2
-        )
-
-        /*
-         * Make sure the room is not blocked.
-         */
-        AND NOT EXISTS (
-
-            SELECT 1
-
-            FROM blocked_dates bd
-
-            WHERE bd.room_id = r.id
-
-            AND bd.start_date < $3
-
-            AND bd.end_date > $2
-        )
-
         ORDER BY r.id;
     `;
 
-    const { rows } = await db.query(
-        query,
-        [
-            roomIds,
-            checkIn,
-            checkOut
-        ]
+    const { rows: selectedRooms } = await db.query(
+        selectedRoomsQuery,
+        [expandedRoomIds]
     );
 
-    return rows;
+    const selectedSet = new Set(roomIds.map(id => Number(id)));
+    const requestedRooms = selectedRooms.filter(room =>
+        selectedSet.has(Number(room.id))
+    );
+
+    const unavailableBookingQuery = `
+        SELECT DISTINCT
+            br.room_id
+
+        FROM booking_rooms br
+
+        INNER JOIN bookings b
+            ON b.id = br.booking_id
+
+        WHERE br.room_id = ANY($1::int[])
+        AND (
+            b.booking_status = 'CONFIRMED'
+            OR (
+                b.booking_status = 'PENDING'
+                AND b.reservation_expires_at > NOW()
+            )
+        )
+        AND b.check_in < $3
+        AND b.check_out > $2;
+    `;
+
+    const blockedDatesQuery = `
+        SELECT DISTINCT
+            bd.room_id
+
+        FROM blocked_dates bd
+
+        WHERE bd.room_id = ANY($1::int[])
+        AND bd.start_date < $3
+        AND bd.end_date > $2;
+    `;
+
+    const [
+        overlappingBookings,
+        blockedDates
+    ] = await Promise.all([
+        db.query(unavailableBookingQuery, [expandedRoomIds, checkIn, checkOut]),
+        db.query(blockedDatesQuery, [expandedRoomIds, checkIn, checkOut])
+    ]);
+
+    const unavailableRoomIds = [
+        ...overlappingBookings.rows.map(row => Number(row.room_id)),
+        ...blockedDates.rows.map(row => Number(row.room_id))
+    ];
+
+    const filteredRooms = selectedRooms.filter(room => {
+        if (room.room_type !== "DORM") {
+            return !unavailableRoomIds.includes(Number(room.id));
+        }
+
+        return true;
+    });
+
+    const finalRooms = collapseDormInventory(
+        filterAvailableDormRooms(filteredRooms, unavailableRoomIds)
+    );
+
+    return finalRooms.filter(room => selectedSet.has(Number(room.id)));
 }
 
 

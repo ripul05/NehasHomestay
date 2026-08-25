@@ -1,4 +1,9 @@
 const db = require("./connection");
+const {
+    getDormGroupForRoom,
+    validateDormSelection,
+    expandDormSelectionIds
+} = require("./dormInventory");
 
 
 /**
@@ -39,6 +44,33 @@ async function createBooking({
          * ------------------------------------------------
          */
 
+        const allDormRoomsQuery = `
+            SELECT
+                id,
+                code,
+                name,
+                room_type,
+                capacity,
+                max_adults,
+                max_children,
+                price_per_night,
+                active
+
+            FROM rooms
+
+            WHERE room_type = 'DORM'
+            AND (
+                name ILIKE '%mix dorm%' OR
+                name ILIKE '%mixed dorm%'
+            )
+            AND active = TRUE;
+        `;
+
+        const dormRows = await client.query(allDormRoomsQuery);
+        const expandedRoomIds = expandDormSelectionIds(roomIds, [
+            ...dormRows.rows
+        ]);
+
         const roomQuery = `
             SELECT
                 id,
@@ -63,11 +95,16 @@ async function createBooking({
 
         const roomResult = await client.query(
             roomQuery,
-            [roomIds]
+            [expandedRoomIds]
         );
 
+        const roomLookup = new Map(
+            roomResult.rows.map(room => [Number(room.id), room])
+        );
 
-        const rooms = roomResult.rows;
+        const rooms = roomIds
+            .map(id => roomLookup.get(Number(id)))
+            .filter(Boolean);
 
 
         /*
@@ -82,6 +119,11 @@ async function createBooking({
 
         }
 
+        validateDormSelection(roomIds, rooms);
+
+        const reservationRoomRows = [...new Set(expandedRoomIds)].map(
+            id => roomLookup.get(Number(id))
+        ).filter(Boolean);
 
         /*
          * ------------------------------------------------
@@ -120,7 +162,7 @@ async function createBooking({
             await client.query(
                 bookingCheckQuery,
                 [
-                    roomIds,
+                    expandedRoomIds,
                     checkIn,
                     checkOut
                 ]
@@ -178,7 +220,7 @@ async function createBooking({
             await client.query(
                 blockedQuery,
                 [
-                    roomIds,
+                    expandedRoomIds,
                     checkIn,
                     checkOut
                 ]
@@ -392,7 +434,7 @@ async function createBooking({
          * ------------------------------------------------
          */
 
-        for (const room of rooms) {
+        for (const room of reservationRoomRows) {
 
             await client.query(
                 `
