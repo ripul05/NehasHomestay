@@ -50,13 +50,9 @@ router.post("/availability", createRateLimiter({
         }
 
 
-        const start = new Date(checkIn);
-        const end = new Date(checkOut);
-
-
         if (
-            Number.isNaN(start.getTime()) ||
-            Number.isNaN(end.getTime())
+            !/^\d{4}-\d{2}-\d{2}$/.test(checkIn) ||
+            !/^\d{4}-\d{2}-\d{2}$/.test(checkOut)
         ) {
 
             return res.status(400).json({
@@ -70,7 +66,7 @@ router.post("/availability", createRateLimiter({
         }
 
 
-        if (start >= end) {
+        if (checkIn >= checkOut) {
 
             return res.status(400).json({
 
@@ -218,13 +214,9 @@ router.post("/validate-selection", createRateLimiter({
         }
 
 
-        const start = new Date(checkIn);
-        const end = new Date(checkOut);
-
-
         if (
-            Number.isNaN(start.getTime()) ||
-            Number.isNaN(end.getTime())
+            !/^\d{4}-\d{2}-\d{2}$/.test(checkIn) ||
+            !/^\d{4}-\d{2}-\d{2}$/.test(checkOut)
         ) {
 
             return res.status(400).json({
@@ -238,7 +230,7 @@ router.post("/validate-selection", createRateLimiter({
         }
 
 
-        if (start >= end) {
+        if (checkIn >= checkOut) {
 
             return res.status(400).json({
 

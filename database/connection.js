@@ -5,7 +5,9 @@ dotenv.config({
     path: path.resolve(__dirname, "../.env")
 });
 
-const { Pool } = require("pg");
+const { Pool, types } = require("pg");
+
+types.setTypeParser(1082, value => value);
 
 console.log(
     "DATABASE_URL exists:",

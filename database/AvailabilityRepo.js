@@ -53,8 +53,8 @@ async function getAvailableRooms(checkIn, checkOut) {
             )
         )
 
-        AND b.check_in < $2
-        AND b.check_out > $1;
+        AND b.check_in < $2::date
+        AND b.check_out > $1::date;
     `;
 
     const blockedDatesQuery = `
@@ -63,21 +63,37 @@ async function getAvailableRooms(checkIn, checkOut) {
 
         FROM blocked_dates bd
 
-        WHERE bd.start_date < $2
-        AND bd.end_date > $1;
+        WHERE bd.start_date < $2::date
+        AND bd.end_date > $1::date;
+    `;
+
+    const externalBookingsQuery = `
+        SELECT DISTINCT
+            ebr.room_id
+
+        FROM external_booking_rooms ebr
+        INNER JOIN external_bookings eb
+            ON eb.id = ebr.external_booking_id
+
+        WHERE eb.status IN ('CONFIRMED', 'BLOCKED')
+        AND eb.check_in < $2::date
+        AND eb.check_out > $1::date;
     `;
 
     const [
         overlappingBookings,
-        blockedDates
+        blockedDates,
+        externalBookings
     ] = await Promise.all([
         db.query(overlappingBookingQuery, [checkIn, checkOut]),
-        db.query(blockedDatesQuery, [checkIn, checkOut])
+        db.query(blockedDatesQuery, [checkIn, checkOut]),
+        db.query(externalBookingsQuery, [checkIn, checkOut])
     ]);
 
     const unavailableRoomIds = [
         ...overlappingBookings.rows.map(row => Number(row.room_id)),
-        ...blockedDates.rows.map(row => Number(row.room_id))
+        ...blockedDates.rows.map(row => Number(row.room_id)),
+        ...externalBookings.rows.map(row => Number(row.room_id))
     ];
 
     const filteredRooms = allRooms.filter(room => {
@@ -182,14 +198,14 @@ async function getAvailability(
      * Calculate number of nights.
      */
 
-    const startDate = new Date(checkIn);
-    const endDate = new Date(checkOut);
+    const [startYear, startMonth, startDay] = checkIn.split("-").map(Number);
+    const [endYear, endMonth, endDay] = checkOut.split("-").map(Number);
+
+    const startUtc = Date.UTC(startYear, startMonth - 1, startDay);
+    const endUtc = Date.UTC(endYear, endMonth - 1, endDay);
 
     const nights = Math.round(
-        (
-            endDate.getTime() -
-            startDate.getTime()
-        ) /
+        (endUtc - startUtc) /
         (1000 * 60 * 60 * 24)
     );
 

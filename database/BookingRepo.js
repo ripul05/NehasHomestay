@@ -12,6 +12,16 @@ const {
  *
  * Everything happens inside ONE transaction.
  */
+function countNights(checkIn, checkOut) {
+    const [startYear, startMonth, startDay] = checkIn.split("-").map(Number);
+    const [endYear, endMonth, endDay] = checkOut.split("-").map(Number);
+
+    const startUtc = Date.UTC(startYear, startMonth - 1, startDay);
+    const endUtc = Date.UTC(endYear, endMonth - 1, endDay);
+
+    return Math.round((endUtc - startUtc) / (1000 * 60 * 60 * 24));
+}
+
 async function createBooking({
     bookingReference,
     guestName,
@@ -150,9 +160,9 @@ async function createBooking({
                 )
             )
 
-            AND b.check_in < $3
+            AND b.check_in < $3::date
 
-            AND b.check_out > $2
+            AND b.check_out > $2::date
 
             FOR UPDATE;
         `;
@@ -208,9 +218,9 @@ async function createBooking({
 
             WHERE room_id = ANY($1::int[])
 
-            AND start_date < $3
+            AND start_date < $3::date
 
-            AND end_date > $2
+            AND end_date > $2::date
 
             FOR UPDATE;
         `;
@@ -245,6 +255,57 @@ async function createBooking({
 
             error.roomIds =
                 blockedRoomIds;
+
+
+            throw error;
+
+        }
+
+
+        const externalBookingQuery = `
+            SELECT DISTINCT
+                ebr.room_id
+
+            FROM external_booking_rooms ebr
+
+            INNER JOIN external_bookings eb
+                ON eb.id = ebr.external_booking_id
+
+            WHERE ebr.room_id = ANY($1::int[])
+            AND eb.status IN ('CONFIRMED', 'BLOCKED')
+            AND eb.check_in < $3::date
+            AND eb.check_out > $2::date;
+        `;
+
+        const externalBookingResult =
+            await client.query(
+                externalBookingQuery,
+                [
+                    expandedRoomIds,
+                    checkIn,
+                    checkOut
+                ]
+            );
+
+
+        if (externalBookingResult.rows.length > 0) {
+
+            const unavailableRoomIds =
+                externalBookingResult.rows.map(
+                    row => row.room_id
+                );
+
+
+            const error =
+                new Error(
+                    "One or more selected rooms are no longer available."
+                );
+
+
+            error.code = "ROOM_UNAVAILABLE";
+
+            error.roomIds =
+                unavailableRoomIds;
 
 
             throw error;
@@ -316,21 +377,8 @@ async function createBooking({
          * ------------------------------------------------
          */
 
-        const startDate =
-            new Date(checkIn);
-
-        const endDate =
-            new Date(checkOut);
-
-
         const nights =
-            Math.round(
-                (
-                    endDate.getTime() -
-                    startDate.getTime()
-                ) /
-                (1000 * 60 * 60 * 24)
-            );
+            countNights(checkIn, checkOut);
 
 
         if (nights <= 0) {

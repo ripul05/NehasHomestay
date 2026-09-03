@@ -19,10 +19,12 @@ function propertyToday() {
 
 function parseIsoDate(value) {
     if (typeof value !== "string" || !ISO_DATE.test(value)) return null;
-    const date = new Date(`${value}T00:00:00.000Z`);
-    return Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value
-        ? null
-        : date;
+
+    const [year, month, day] = value.split("-").map(Number);
+    if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) return null;
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+
+    return value;
 }
 
 function validateStayDates(checkIn, checkOut) {

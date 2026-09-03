@@ -83,8 +83,8 @@ async function getSelectedRooms(
                 AND b.reservation_expires_at > NOW()
             )
         )
-        AND b.check_in < $3
-        AND b.check_out > $2;
+        AND b.check_in < $3::date
+        AND b.check_out > $2::date;
     `;
 
     const blockedDatesQuery = `
@@ -94,21 +94,39 @@ async function getSelectedRooms(
         FROM blocked_dates bd
 
         WHERE bd.room_id = ANY($1::int[])
-        AND bd.start_date < $3
-        AND bd.end_date > $2;
+        AND bd.start_date < $3::date
+        AND bd.end_date > $2::date;
+    `;
+
+    const externalBookingsQuery = `
+        SELECT DISTINCT
+            ebr.room_id
+
+        FROM external_booking_rooms ebr
+
+        INNER JOIN external_bookings eb
+            ON eb.id = ebr.external_booking_id
+
+        WHERE ebr.room_id = ANY($1::int[])
+        AND eb.status IN ('CONFIRMED', 'BLOCKED')
+        AND eb.check_in < $3::date
+        AND eb.check_out > $2::date;
     `;
 
     const [
         overlappingBookings,
-        blockedDates
+        blockedDates,
+        externalBookings
     ] = await Promise.all([
         db.query(unavailableBookingQuery, [expandedRoomIds, checkIn, checkOut]),
-        db.query(blockedDatesQuery, [expandedRoomIds, checkIn, checkOut])
+        db.query(blockedDatesQuery, [expandedRoomIds, checkIn, checkOut]),
+        db.query(externalBookingsQuery, [expandedRoomIds, checkIn, checkOut])
     ]);
 
     const unavailableRoomIds = [
         ...overlappingBookings.rows.map(row => Number(row.room_id)),
-        ...blockedDates.rows.map(row => Number(row.room_id))
+        ...blockedDates.rows.map(row => Number(row.room_id)),
+        ...externalBookings.rows.map(row => Number(row.room_id))
     ];
 
     const filteredRooms = selectedRooms.filter(room => {
