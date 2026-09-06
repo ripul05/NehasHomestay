@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const paymentRepository = require("./database/PaymentRepo");
 const airbnbCalendarService = require("./services/AirbnbCalendarService");
 
+
 const allowedOrigins = new Set(
   (process.env.ALLOWED_ORIGINS || "")
     .split(",")
@@ -75,11 +76,13 @@ const availabilityRoutes = require("./routes/AvailabilityRoutes");
 const bookingRoutes = require("./routes/BookingRoutes");
 const paymentRoutes = require("./routes/PaymentRoutes");
 const airbnbCalendarRoutes = require("./routes/AirbnbCalendarRoutes");
+const mmtCalendarRoutes = require("./routes/MMTCalendarRoutes");
 
 app.use("/api", availabilityRoutes);
 app.use("/api", bookingRoutes);
 app.use("/api", paymentRoutes);
 app.use("/api", airbnbCalendarRoutes);
+app.use("/api", mmtCalendarRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
