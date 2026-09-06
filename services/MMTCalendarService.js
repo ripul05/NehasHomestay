@@ -25,7 +25,8 @@ const FETCH_TIMEOUT_MS = 25000;
  * MMT listing 1 -> Website Room 1
  */
 const MMT_EXPORT_LISTING_ROOM_MAP = {
-    1: [1]
+    1: [1],
+    2: [2]
 };
 
 function normalizeText(value) {
