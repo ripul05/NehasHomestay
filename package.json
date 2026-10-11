@@ -7,7 +7,9 @@
     "start": "nodemon server.js"
   },
   "dependencies": {
+    "@getbrevo/brevo": "^6.0.3",
     "body-parser": "^2.3.0",
+    "brevo": "^1.0.0",
     "dotenv": "^17.4.2",
     "express": "^4.21.0",
     "node-ical": "0.18.0",

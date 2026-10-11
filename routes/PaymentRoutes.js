@@ -8,6 +8,10 @@ const Razorpay =
 const router =
     express.Router();
 
+const {
+    sendCustomerBookingEmail,
+    sendAdminBookingEmail
+} = require("../services/EmailService");
 
 const paymentRepository =
     require("../database/PaymentRepo");
@@ -725,6 +729,35 @@ router.post(
                 });
             }
 
+            /*
+            * ============================================================
+            * SEND BOOKING EMAILS
+            * ============================================================
+            */
+
+            try {
+
+                await Promise.allSettled([
+
+                    sendCustomerBookingEmail(
+                        updatedBooking
+                    ),
+
+                    sendAdminBookingEmail(
+                        updatedBooking
+                    )
+
+                ]);
+
+            }
+            catch (emailError) {
+
+                console.error(
+                    "Booking email error:",
+                    emailError
+                );
+
+            }
 
             /*
              * ==================================

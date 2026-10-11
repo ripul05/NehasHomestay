@@ -521,7 +521,8 @@ router.post("/validate-selection", createRateLimiter({
          * Calculate nights
          * --------------------------------
          */
-
+        const start = new Date(checkIn);
+        const end = new Date(checkOut);
         const nights = Math.round(
             (
                 end.getTime() -
