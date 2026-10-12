@@ -23,11 +23,18 @@ const adminEmail = process.env.ADMIN_EMAIL;
 
 async function sendCustomerBookingEmail(booking) {
 
-    if (!booking.email) {
+    const guestEmail =
+        booking.email ||
+        booking.customer_email ||
+        booking.guest_email ||
+        booking.email_address ||
+        null;
+
+    if (!guestEmail) {
 
         console.error(
             "Customer email is missing. Booking:",
-            booking.booking_reference
+            booking.booking_reference || booking.bookingReference || booking.id
         );
 
         return null;
@@ -35,7 +42,9 @@ async function sendCustomerBookingEmail(booking) {
 
 
     const guestName =
-        booking.guest_name || "Guest";
+        booking.guest_name ||
+        booking.customer_name ||
+        "Guest";
 
 
     const bookingReference =
@@ -63,7 +72,7 @@ async function sendCustomerBookingEmail(booking) {
 
                 to: [
                     {
-                        email: booking.email,
+                        email: guestEmail,
                         name: guestName
                     }
                 ],

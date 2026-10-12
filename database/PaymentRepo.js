@@ -2,7 +2,8 @@ const db = require("./connection");
 
 async function getBookingForPayment(bookingId, accessTokenHash) {
     const result = await db.query(`
-        SELECT id, booking_reference, total_amount, payment_status, booking_status,
+        SELECT id, booking_reference, guest_name, email, phone, check_in, check_out,
+               adults, children, total_amount, payment_status, booking_status,
                reservation_expires_at, razorpay_order_id
         FROM bookings
         WHERE id = $1
@@ -56,7 +57,8 @@ async function markPaymentVerified({ bookingId, razorpayPaymentId, razorpaySigna
           AND payment_status <> 'PAID'
           AND booking_status = 'PENDING'
           AND reservation_expires_at > NOW()
-        RETURNING id, booking_reference, total_amount, payment_status, booking_status,
+        RETURNING id, booking_reference, guest_name, email, phone, check_in, check_out,
+                  adults, children, total_amount, payment_status, booking_status,
                   razorpay_order_id, razorpay_payment_id;
     `, [bookingId, razorpayPaymentId, razorpaySignature]);
     return result.rows[0] || null;
